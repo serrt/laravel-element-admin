@@ -7,7 +7,8 @@
           {{ JSON.stringify(props.row.properties) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="ID" prop="id" sortable="custom" />
+      <el-table-column align="center" label="ID" prop="id" />
+      <el-table-column align="center" label="Type" prop="log_name" />
       <el-table-column align="center" label="操作人" prop="causer_id">
         <template v-if="scope.row.causer" slot-scope="scope">
           <el-avatar :src="scope.row.causer.avatar" />
@@ -47,7 +48,7 @@
 </template>
 
 <script>
-import { list, clear } from '@/api/activityLog'
+import { list, clear } from '@/api/activity-log'
 
 export default {
   name: 'ActivityLog',

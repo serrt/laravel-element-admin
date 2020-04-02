@@ -41,7 +41,7 @@
 
 <script>
 import { getToken } from '@/utils/auth'
-import { getInfo } from '@/api/user'
+import { getInfo } from '@/api/auth'
 
 export default {
   name: 'Profile',

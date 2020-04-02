@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '个创园',
+  title: 'Element-Admin',
 
   /**
    * @type {boolean} true | false

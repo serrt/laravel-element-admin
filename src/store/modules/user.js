@@ -1,4 +1,4 @@
-import { login, logout, getInfo, update } from '@/api/user'
+import { login, logout, getInfo, update } from '@/api/auth'
 import { getToken, setToken, removeToken, guard } from '@/utils/auth'
 import { Message } from 'element-ui'
 import router, { resetRouter } from '@/router'
