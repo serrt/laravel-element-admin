@@ -3,19 +3,7 @@
     <el-form ref="form" v-loading="formLoading" :model="form" :rules="rules" label-width="80px">
       <el-form-item label="头像">
         <el-col :sm="11">
-          <el-upload
-            v-loading="avatarLoading"
-            accept="image/*"
-            :action="baseUri + '/admin/upload'"
-            :data="{path: 'avatar'}"
-            :headers="headers"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
-          >
-            <img v-if="form.avatar" :src="form.avatar" class="avatar">
-            <i v-else class="el-icon-folder-opened avatar-uploader-icon" />
-          </el-upload>
+          <upload-image :value="form.avatar" path="avatar" @success="handleAvatarSuccess" />
         </el-col>
       </el-form-item>
       <el-form-item label="用户名" prop="username">
@@ -48,6 +36,9 @@
           <el-input v-model="form.password" type="password" />
         </el-col>
       </el-form-item>
+      <el-form-item label="权限">
+        <permission-tree :value="form.permissions" @handleCheckChange="handleCheckChange" />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
         <el-button @click="$router.back()">返回</el-button>
@@ -57,13 +48,15 @@
 </template>
 
 <script>
-import { getToken } from '@/utils/auth'
 import { update, show } from '@/api/adminUser'
 import { unique } from '@/api/web'
 import { list } from '@/api/role'
+import PermissionTree from '@/components/PermissionTree'
+import UploadImage from '@/components/UploadImage'
 
 export default {
   name: 'AdminUserEdit',
+  components: { PermissionTree, UploadImage },
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!value) {
@@ -80,23 +73,18 @@ export default {
       })
     }
     return {
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Authorization': 'Bearer ' + getToken()
-      },
-      baseUri: process.env.VUE_APP_BASE_API,
-      avatarLoading: false,
       formLoading: false,
       form: {
         username: '',
         name: '',
         avatar: '',
-        roles: []
+        roles: [],
+        permissions: []
       },
       rules: {
         username: [
           { required: true, message: '用户名必填', trigger: 'blur' },
+          { pattern: /^[\w|_|-]+$/, message: '只能由 字母, 数字, _, - 组成', trigger: 'blur' },
           { validator: validateUsername, trigger: 'blur' }
         ],
         name: [{ required: true, message: '姓名必填', trigger: 'blur' }],
@@ -110,7 +98,7 @@ export default {
   },
   created() {
     if (this.$route.params.id) {
-      show(this.$route.params.id, { include: ['roles'] }).then(res => {
+      show(this.$route.params.id, { include: ['roles', 'permissions'] }).then(res => {
         if (res.code === 200) {
           const data = res.data
           const roleOptions = data.roles
@@ -119,6 +107,14 @@ export default {
             roleIds.push(data.roles[i].id)
           }
           data.roles = roleIds
+
+          // format permissions
+          const permissions = []
+          for (let i = 0; i < data.permissions.length; i++) {
+            permissions.push(data.permissions[i].id)
+          }
+          data.permissions = permissions
+
           this.form = data
           this.roles = roleOptions
           this.getRoles()
@@ -131,21 +127,8 @@ export default {
     }
   },
   methods: {
-    handleAvatarSuccess(res, file) {
-      this.avatarLoading = false
-      if (res.code === 200 && res.data) {
-        this.form.avatar = res.data.file
-      } else {
-        this.$message.error(res.message || '上传失败')
-      }
-    },
-    beforeAvatarUpload(file) {
-      this.avatarLoading = true
-      if (file.size >= 2 * 1024 * 1024) {
-        this.avatarLoading = false
-        this.$message.error('上传头像图片大小不能超过 2MB!')
-      }
-      return true
+    handleAvatarSuccess(file) {
+      this.form.avatar = file
     },
     getRoles(key) {
       this.selectLoading = true
@@ -179,6 +162,18 @@ export default {
           })
         }
       })
+    },
+    handleCheckChange(data, checked, indeterminate) {
+      const index = this.form.permissions.indexOf(data.id)
+      if (checked || indeterminate) {
+        if (index === -1) {
+          this.form.permissions.push(data.id)
+        }
+      } else {
+        if (index !== -1) {
+          this.form.permissions.splice(index, 1)
+        }
+      }
     }
   }
 }

@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { Message } from 'element-ui'
 import store from '@/store'
-import { getToken } from '@/utils/auth'
+import { getToken, removeToken } from '@/utils/auth'
+import router from '@/router'
 
 // create an axios instance
 const service = axios.create({
@@ -59,6 +60,12 @@ service.interceptors.response.use(
       type: 'error',
       duration: 5 * 1000
     })
+
+    // 重定向到登录页面
+    if (status === 401) {
+      removeToken()
+      router.push('/login')
+    }
     return Promise.reject(error)
   }
 )

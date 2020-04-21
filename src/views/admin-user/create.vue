@@ -3,19 +3,7 @@
     <el-form ref="form" v-loading="formLoading" :model="form" :rules="rules" label-width="80px">
       <el-form-item label="头像">
         <el-col :sm="11">
-          <el-upload
-            v-loading="avatarLoading"
-            accept="image/*"
-            :data="{path: 'avatar'}"
-            :action="baseUri + '/admin/upload'"
-            :headers="headers"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
-          >
-            <img v-if="form.avatar" :src="form.avatar" class="avatar">
-            <i v-else class="el-icon-folder-opened avatar-uploader-icon" />
-          </el-upload>
+          <upload-image :value="form.avatar" @success="handleAvatarSuccess" />
         </el-col>
       </el-form-item>
       <el-form-item label="用户名" prop="username">
@@ -57,13 +45,14 @@
 </template>
 
 <script>
-import { getToken } from '@/utils/auth'
 import { create } from '@/api/adminUser'
 import { unique } from '@/api/web'
 import { list } from '@/api/role'
+import UploadImage from '@/components/UploadImage'
 
 export default {
   name: 'AdminUserCreate',
+  components: { UploadImage },
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!value) {
@@ -78,14 +67,6 @@ export default {
       })
     }
     return {
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Authorization': 'Bearer ' + getToken()
-      },
-      baseUri: process.env.VUE_APP_BASE_API,
-      avatarLoading: false,
-      formLoading: false,
       form: {
         username: '',
         name: '',
@@ -95,6 +76,7 @@ export default {
       rules: {
         username: [
           { required: true, message: '用户名必填', trigger: 'blur' },
+          { pattern: /^[\w|_|-]+$/, message: '只能由 字母, 数字, _, - 组成', trigger: 'blur' },
           { validator: validateUsername, trigger: 'blur' }
         ],
         name: [{ required: true, message: '姓名必填', trigger: 'blur' }],
@@ -111,13 +93,8 @@ export default {
     this.getRoles()
   },
   methods: {
-    handleAvatarSuccess(res, file) {
-      this.avatarLoading = false
-      if (res.code === 200 && res.data) {
-        this.form.avatar = res.data.file
-      } else {
-        this.$message.error(res.message || '上传失败')
-      }
+    handleAvatarSuccess(src) {
+      this.form.avatar = src
     },
     beforeAvatarUpload(file) {
       this.avatarLoading = true
@@ -150,6 +127,8 @@ export default {
             if (res.code === 200) {
               this.$message.success('添加成功')
               this.$router.back()
+            } else {
+              this.$message.error(res.message)
             }
           }).catch(error => {
             this.formLoading = false

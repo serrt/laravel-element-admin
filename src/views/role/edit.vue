@@ -62,6 +62,7 @@ export default {
         ],
         name: [
           { required: true, message: 'Name 必填', trigger: 'blur' },
+          { pattern: /^[\w|_|-]+$/, message: '只能由 字母, 数字, _, - 组成', trigger: 'blur' },
           { validator: validateUsername, trigger: 'blur' }
         ]
       }
