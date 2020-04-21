@@ -1,12 +1,11 @@
 <template>
   <el-tree
     :data="data"
-    :default-expand-all="true"
     :props="defaultProps"
     :default-checked-keys="value"
     node-key="id"
     show-checkbox
-    @check-change="handleCheckChange"
+    @check="handleCheck"
   />
 </template>
 
@@ -40,8 +39,15 @@ export default {
     })
   },
   methods: {
-    handleCheckChange(data, checked, indeterminate) {
-      this.$emit('handleCheckChange', data, checked, indeterminate)
+    handleCheck(item, data) {
+      const ids = []
+      data.halfCheckedNodes.map(node => {
+        ids.push(node.id)
+      })
+      data.checkedNodes.map(node => {
+        ids.push(node.id)
+      })
+      this.$emit('update', ids)
     }
   }
 }

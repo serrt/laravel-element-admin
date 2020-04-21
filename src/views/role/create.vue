@@ -17,7 +17,7 @@
         </el-col>
       </el-form-item>
       <el-form-item label="权限">
-        <permission-tree @handleCheckChange="handleCheckChange" />
+        <permission-tree @update="handleCheckChange" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
@@ -82,17 +82,8 @@ export default {
       })
     },
 
-    handleCheckChange(data, checked, indeterminate) {
-      const index = this.form.permissions.indexOf(data.id)
-      if (checked || indeterminate) {
-        if (index === -1) {
-          this.form.permissions.push(data.id)
-        }
-      } else {
-        if (index !== -1) {
-          this.form.permissions.splice(index, 1)
-        }
-      }
+    handleCheckChange(ids) {
+      this.form.permissions = ids
     }
   }
 }
