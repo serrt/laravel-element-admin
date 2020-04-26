@@ -17,7 +17,7 @@
         </el-col>
       </el-form-item>
       <el-form-item v-if="form.name !== 'admin'" label="权限">
-        <permission-tree v-if="permissions.length" :value="permissions" @update="handleCheckChange" />
+        <permission-tree :value="form.permissions" @update="handleCheckChange" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
@@ -65,40 +65,23 @@ export default {
           { pattern: /^[\w|_|-]+$/, message: '只能由 字母, 数字, _, - 组成', trigger: 'blur' },
           { validator: validateUsername, trigger: 'blur' }
         ]
-      },
-      permissions: []
+      }
     }
   },
   created() {
     if (this.$route.params.id) {
       show(this.$route.params.id, { include: ['permissions'] }).then(res => {
         if (res.code === 200) {
-          this.form = res.data
-          const permissionIds = []
-          const _permissions = []
-          res.data.permissions.map(item => {
-            _permissions.push(item.id)
-            _permissions.push(item.pid)
-            permissionIds.push(item.id)
+          const data = res.data
+          data.permissions = data.permissions.map(item => {
+            return item.id
           })
-          this.form.permissions = permissionIds
-          for (let i = 0; i < _permissions.length; i++) {
-            let count = 0
-            for (let j = 0; j < _permissions.length; j++) {
-              if (_permissions[i] === _permissions[j]) {
-                count++
-                if (count > 1) {
-                  break
-                }
-              }
-            }
-            if (count === 1) {
-              this.permissions.push(_permissions[i])
-            }
-          }
+          this.form = data
         } else {
           this.$message.error(res.message)
         }
+      }).catch(error => {
+        console.log(error)
       })
     }
   },

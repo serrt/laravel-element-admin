@@ -7,8 +7,8 @@
       row-key="id"
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >
-      <el-table-column align="center" label="名称" prop="display_name" />
-      <el-table-column align="right">
+      <el-table-column align="left" label="名称" prop="display_name" />
+      <el-table-column align="left">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
           <el-button size="mini" type="danger" :loading="buttonLoading" :disabled="scope.row.name === 'admin'" @click="handleDelete(scope.$index, scope.row)">删除</el-button>

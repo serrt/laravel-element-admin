@@ -37,7 +37,7 @@
         </el-col>
       </el-form-item>
       <el-form-item label="权限">
-        <permission-tree :value="form.permissions" @handleCheckChange="handleCheckChange" />
+        <permission-tree :value="form.permissions" @update="handleCheckChange" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
@@ -102,18 +102,13 @@ export default {
         if (res.code === 200) {
           const data = res.data
           const roleOptions = data.roles
-          const roleIds = []
-          for (let i = 0; i < data.roles.length; i++) {
-            roleIds.push(data.roles[i].id)
-          }
-          data.roles = roleIds
+          data.roles = data.roles.map(item => {
+            return item.id
+          })
 
-          // format permissions
-          const permissions = []
-          for (let i = 0; i < data.permissions.length; i++) {
-            permissions.push(data.permissions[i].id)
-          }
-          data.permissions = permissions
+          data.permissions = data.permissions.map(item => {
+            return item.id
+          })
 
           this.form = data
           this.roles = roleOptions
@@ -163,17 +158,8 @@ export default {
         }
       })
     },
-    handleCheckChange(data, checked, indeterminate) {
-      const index = this.form.permissions.indexOf(data.id)
-      if (checked || indeterminate) {
-        if (index === -1) {
-          this.form.permissions.push(data.id)
-        }
-      } else {
-        if (index !== -1) {
-          this.form.permissions.splice(index, 1)
-        }
-      }
+    handleCheckChange(ids) {
+      this.form.permissions = ids
     }
   }
 }
@@ -181,29 +167,6 @@ export default {
 <style scoped>
 .el-select {
   width: 100%;
-}
-.avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader .el-upload:hover {
-  border-color: #409EFF;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  line-height: 178px;
-  text-align: center;
-}
-.avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
 }
 </style>
 

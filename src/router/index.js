@@ -5,7 +5,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
-import admin from './modules/admin'
+import Empty from '@/views/empty'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -79,14 +79,45 @@ export const asyncRoutes = [
     path: '/admin',
     name: 'Admin',
     component: Layout,
-    meta: { title: '权限管理', roles: ['web.admin'], icon: 'setting' },
-    children: admin
+    meta: { title: '权限管理', permissions: ['web.admin'], icon: 'setting' },
+    children: [
+      {
+        path: 'user',
+        component: Empty,
+        meta: { title: '账号', permissions: ['web.admin.admin_user'] },
+        children: [
+          { path: '', name: 'AdminUserIndex', component: () => import('@/views/admin-user/index'), meta: { title: 'Index' }, hidden: true },
+          { path: 'create', name: 'AdminUserCreate', component: () => import('@/views/admin-user/create'), meta: { title: 'Create', activeMenu: '/admin/user' }, hidden: true },
+          { path: ':id/edit', name: 'AdminUserEdit', component: () => import('@/views/admin-user/edit'), meta: { title: 'Edit', activeMenu: '/admin/user' }, hidden: true }
+        ]
+      },
+      {
+        path: 'role',
+        component: Empty,
+        meta: { title: '角色', permissions: ['web.admin.role'] },
+        children: [
+          { path: '', name: 'RoleIndex', component: () => import('@/views/role/index'), meta: { title: 'Index' }, hidden: true },
+          { path: 'create', name: 'RoleCreate', component: () => import('@/views/role/create'), meta: { title: 'Create', activeMenu: '/admin/role' }, hidden: true },
+          { path: ':id/edit', name: 'RoleEdit', component: () => import('@/views/role/edit'), meta: { title: 'Edit', activeMenu: '/admin/role' }, hidden: true }
+        ]
+      },
+      {
+        path: 'permission',
+        component: Empty,
+        meta: { title: '权限', permissions: ['web.admin.permission'] },
+        children: [
+          { path: '', name: 'PermissionIndex', component: () => import('@/views/permission/index'), meta: { title: 'Index' }, hidden: true },
+          { path: 'create', name: 'PermissionCreate', component: () => import('@/views/permission/create'), meta: { title: 'Create', activeMenu: '/admin/permission' }, hidden: true },
+          { path: ':id/edit', name: 'PermissionEdit', component: () => import('@/views/permission/edit'), meta: { title: 'Edit', activeMenu: '/admin/permission' }, hidden: true }
+        ]
+      }
+    ]
   },
 
   {
     path: '/activity-log',
     component: Layout,
-    meta: { roles: ['activity_log'] },
+    meta: { permissions: ['activity_log'] },
     children: [
       {
         path: '',

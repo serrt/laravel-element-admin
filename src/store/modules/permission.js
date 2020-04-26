@@ -1,4 +1,4 @@
-import { asyncRoutes, constantRoutes, agentRoutes, resetRouter } from '@/router'
+import { asyncRoutes, constantRoutes } from '@/router'
 import { guard } from '@/utils/auth'
 
 /**
@@ -6,9 +6,9 @@ import { guard } from '@/utils/auth'
  * @param roles
  * @param route
  */
-function hasPermission(roles, route) {
-  if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.includes(role))
+function hasPermission(permissions, route) {
+  if (route.meta && route.meta.permissions) {
+    return permissions.some(permission => route.meta.permissions.includes(permission))
   } else {
     return true
   }
@@ -17,16 +17,16 @@ function hasPermission(roles, route) {
 /**
  * Filter asynchronous routing tables by recursion
  * @param routes asyncRoutes
- * @param roles
+ * @param permissions
  */
-export function filterAsyncRoutes(routes, roles) {
+export function filterAsyncRoutes(routes, permissions) {
   const res = []
 
   routes.forEach(route => {
     const tmp = { ...route }
-    if (hasPermission(roles, tmp)) {
+    if (hasPermission(permissions, tmp)) {
       if (tmp.children) {
-        tmp.children = filterAsyncRoutes(tmp.children, roles)
+        tmp.children = filterAsyncRoutes(tmp.children, permissions)
       }
       res.push(tmp)
     }
@@ -48,18 +48,16 @@ const mutations = {
 }
 
 const actions = {
-  generateRoutes({ commit }, roles) {
+  generateRoutes({ commit }, permissions) {
     return new Promise(resolve => {
-      let accessedRoutes, guardName = guard()
+      let accessedRoutes
+      const guardName = guard()
       if (guardName === 'admin') {
-        if (roles.includes('admin')) {
+        if (permissions.includes('admin')) {
           accessedRoutes = asyncRoutes || []
         } else {
-          accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
+          accessedRoutes = filterAsyncRoutes(asyncRoutes, permissions)
         }
-      }
-      else if (guardName === 'agent') {
-        accessedRoutes = agentRoutes
       }
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)

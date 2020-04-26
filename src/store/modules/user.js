@@ -9,7 +9,8 @@ const getDefaultState = () => {
     token: getToken(),
     name: '',
     avatar: '',
-    roles: []
+    roles: [],
+    permissions: []
   }
 }
 
@@ -33,6 +34,9 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_PERMISSIONS: (state, permissions) => {
+    state.permissions = permissions
   }
 }
 
@@ -72,18 +76,22 @@ const actions = {
         }
 
         const { name, avatar, id } = data
-        const roles = ['guest']
+        const permissions = ['guest']
+        const roles = data.roles.map(item => {
+          return item.name
+        })
         if (data.permissions && data.permissions.length) {
           for (let i = 0; i < data.permissions.length > 0; i++) {
-            roles.push(data.permissions[i].name)
+            permissions.push(data.permissions[i].name)
           }
         }
-        data.roles = roles
+        data.permissions = permissions
 
         commit('SET_NAME', name)
         commit('SET_ID', id)
         commit('SET_AVATAR', avatar || require('@/assets/user.jpg'))
         commit('SET_ROLES', roles)
+        commit('SET_PERMISSIONS', permissions)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -113,6 +121,7 @@ const actions = {
       logout(state.token).then(() => {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
+        commit('SET_PERMISSIONS', [])
         removeToken()
         guard('')
         resetRouter()
@@ -128,32 +137,8 @@ const actions = {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
       commit('SET_ROLES', [])
+      commit('SET_PERMISSIONS', [])
       removeToken()
-      resolve()
-    })
-  },
-
-  // dynamically modify permissions
-  changeRoles({ commit, dispatch }, role) {
-    return new Promise(async resolve => {
-      const token = role + '-token'
-
-      commit('SET_TOKEN', token)
-      setToken(token)
-
-      const { roles } = await dispatch('getInfo')
-
-      resetRouter()
-
-      // generate accessible routes map based on roles
-      const accessRoutes = await dispatch('permission/generateRoutes', roles, { root: true })
-
-      // dynamically add accessible routes
-      router.addRoutes(accessRoutes)
-
-      // reset visited views and cached views
-      dispatch('tagsView/delAllViews', null, { root: true })
-
       resolve()
     })
   }
