@@ -1,17 +1,15 @@
 <template>
   <section class="app-main">
-    <transition name="fade-transform" mode="out-in">
-      <!-- <keep-alive :include="/Index/">
-        <router-view :key="key" />
-      </keep-alive> -->
-      <router-view :key="key" />
-    </transition>
+    <empty />
   </section>
 </template>
 
 <script>
+import Empty from '@/views/empty'
+
 export default {
   name: 'AppMain',
+  components: { Empty },
   computed: {
     key() {
       return this.$route.path

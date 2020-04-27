@@ -8,3 +8,13 @@ export function unique(data) {
   })
 }
 
+export function upload(data) {
+  return request({
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    url: '/admin/upload',
+    method: 'post',
+    data
+  })
+}

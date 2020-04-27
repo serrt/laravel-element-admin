@@ -3,18 +3,13 @@
     <el-form ref="form" v-loading="formLoading" :model="form" :rules="rules" label-width="80px">
       <el-form-item>
         <el-col :sm="11">
-          <el-upload
-            v-loading="avatarLoading"
-            class="avatar-uploader"
-            :action="baseUri + '/admin/upload'"
-            :headers="headers"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
-          >
-            <img v-if="form.avatar" :src="form.avatar" class="avatar">
-            <i v-else class="el-icon-folder-opened avatar-uploader-icon" />
-          </el-upload>
+          <upload-image
+            path="avatar"
+            :value="form.avatar"
+            :size="1024 * 1024"
+            :iscrop="true"
+            @success="handleAvatarSuccess"
+          />
         </el-col>
       </el-form-item>
       <el-form-item label="用户名">
@@ -40,20 +35,14 @@
 </template>
 
 <script>
-import { getToken } from '@/utils/auth'
 import { getInfo } from '@/api/auth'
+import UploadImage from '@/components/UploadImage'
 
 export default {
   name: 'Profile',
+  components: { UploadImage },
   data() {
     return {
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Authorization': 'Bearer ' + getToken()
-      },
-      baseUri: process.env.VUE_APP_BASE_API,
-      avatarLoading: false,
       formLoading: false,
       form: {
         username: '',
@@ -79,21 +68,9 @@ export default {
         }
       })
     },
-    handleAvatarSuccess(res, file) {
-      this.avatarLoading = false
-      if (res.code === 200 && res.data) {
-        this.form.avatar = res.data.file
-      } else {
-        this.$message.error(res.message || '上传失败')
-      }
-    },
-    beforeAvatarUpload(file) {
-      this.avatarLoading = true
-      if (file.size >= 2 * 1024 * 1024) {
-        this.avatarLoading = false
-        this.$message.error('上传头像图片大小不能超过 2MB!')
-      }
-      return true
+    handleAvatarSuccess(res) {
+      console.log(res)
+      this.form.avatar = res
     },
     onSubmit() {
       this.$refs['form'].validate((valid) => {
