@@ -16,7 +16,7 @@
           <el-input v-model="form.display_name" />
         </el-col>
       </el-form-item>
-      <el-form-item v-if="form.name !== 'admin'" label="权限">
+      <el-form-item label="权限">
         <permission-tree :value="form.permissions" @update="handleCheckChange" />
       </el-form-item>
       <el-form-item>

@@ -51,20 +51,21 @@ service.interceptors.response.use(
   },
   error => {
     let message = error.message
-    if (error.response.status === 401) {
-      message = '你的登录信息已过期请重新登录'
-    }
-
-    Message({
-      message: message,
-      type: 'error',
-      duration: 5 * 1000
-    })
-
-    // 重定向到登录页面
-    if (status === 401) {
-      removeToken()
-      router.push('/login')
+    const response = error.response
+    if (response) {
+      const status = error.response.status
+      if (status === 401) {
+        removeToken()
+        message = '你的登录信息已过期请重新登录'
+      }
+      Message({
+        message: message,
+        type: 'error',
+        duration: 5 * 1000
+      })
+      if (status === 401) {
+        router.push('/login')
+      }
     }
     return Promise.reject(error)
   }
