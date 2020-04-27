@@ -1,17 +1,11 @@
 <template>
-  <!-- <keep-alive :include="/Index|Empty/">
-    <router-view :key="key" />
-  </keep-alive> -->
-  <router-view :key="key" />
+  <transition name="fade-transform" mode="out-in">
+    <router-view />
+  </transition>
 </template>
 
 <script>
 export default {
-  name: 'Empty',
-  computed: {
-    key() {
-      return this.$route.path
-    }
-  }
+  name: 'Empty'
 }
 </script>
