@@ -10,11 +10,12 @@
       :limit="limit"
       :file-list="fileList"
       :on-success="handleSuccess"
-      :on-remove="handleRemove"
       :on-error="handleError"
+      :on-remove="handleRemove"
       :on-preview="handlePictureCardPreview"
       :on-exceed="handleExceed"
       :before-upload="beforeUpload"
+      multiple
     >
       <i class="el-icon-plus" />
     </el-upload>
@@ -84,19 +85,14 @@ export default {
   },
   methods: {
     handleSuccess(res, file, fileList) {
+      this.fileList = fileList
       this.avatarLoading = false
-      this.$emit('change', fileList.map(item => {
-        return item.response.data.file
-      }))
     },
     handleRemove(file, fileList) {
-      this.$emit('change', fileList.map(item => {
-        return item.response.data.file
-      }))
+      this.fileList = fileList
     },
     handleError(error, file, fileList) {
       this.avatarLoading = false
-      console.log('error')
       console.log(error)
     },
     beforeUpload(file) {
@@ -127,8 +123,8 @@ export default {
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
-    getFileList(fileList) {
-      return fileList.map(item => {
+    getFileList() {
+      return this.fileList.map(item => {
         return item.response.data.file
       })
     }
