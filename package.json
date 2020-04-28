@@ -1,7 +1,7 @@
 {
-  "name": "pioneer-admin",
+  "name": "element-admin",
   "version": "1.0.0",
-  "description": "个创园-后台",
+  "description": "Element-UI Admin",
   "author": "PanLiang",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -68,7 +68,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/paddy_technology/admin-desktop.git"
+    "url": "https://gitee.com/paddy_technology/element-ui.git"
   },
   "license": "UNLICENSED"
 }
