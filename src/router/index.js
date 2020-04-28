@@ -113,7 +113,13 @@ export const asyncRoutes = [
       }
     ]
   },
-
+  {
+    path: '/media',
+    component: Layout,
+    children: [
+      { path: '', name: 'MediaIndex', component: () => import('@/views/media/index'), meta: { title: '媒体管理', icon: 'picture' }}
+    ]
+  },
   {
     path: '/activity-log',
     component: Layout,
