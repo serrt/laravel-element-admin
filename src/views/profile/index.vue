@@ -7,7 +7,6 @@
             path="avatar"
             :value="form.avatar"
             :size="1024 * 1024"
-            :iscrop="true"
             @success="handleAvatarSuccess"
           />
         </el-col>
@@ -49,6 +48,7 @@ export default {
         name: '',
         avatar: ''
       },
+      info: {},
       rules: {
         name: [{ required: true, message: '姓名必填', trigger: 'blur' }],
         password: [{ min: 6, message: '密码最少6位', trigger: 'blur' }]
@@ -62,7 +62,8 @@ export default {
     getUserProfile() {
       getInfo().then(res => {
         if (res.code === 200) {
-          this.form = res.data
+          const { username, name, avatar } = this.info = res.data
+          this.form = { username, name, avatar }
         } else {
           this.$message.error(res.message)
         }
