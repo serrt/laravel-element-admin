@@ -116,6 +116,7 @@ export const asyncRoutes = [
   {
     path: '/media',
     component: Layout,
+    meta: { title: '媒体管理', permissions: ['media'] },
     children: [
       { path: '', name: 'MediaIndex', component: () => import('@/views/media/index'), meta: { title: '媒体管理', icon: 'picture' }}
     ]
@@ -123,7 +124,7 @@ export const asyncRoutes = [
   {
     path: '/activity-log',
     component: Layout,
-    meta: { permissions: ['activity_log'] },
+    meta: { permissions: ['activity-log'] },
     children: [
       {
         path: '',

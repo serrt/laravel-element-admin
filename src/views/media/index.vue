@@ -8,10 +8,10 @@
             <i class="el-breadcrumb__separator el-icon-arrow-right" />
           </span>
         </div>
+        <input id="input-file" type="file" name="file" style="display: none" multiple @change="fileChange">
         <el-button-group>
-          <input id="input-file" type="file" name="file" style="display: none" multiple @change="fileChange">
-          <el-button size="medium" icon="el-icon-upload" @click="fileChoose">上传</el-button>
-          <el-button size="medium" icon="el-icon-folder-add" @click="handleAddFolder">添加目录</el-button>
+          <el-button type="primary" size="medium" icon="el-icon-upload" @click="fileChoose">上传</el-button>
+          <el-button type="primary" size="medium" icon="el-icon-folder-add" @click="handleAddFolder">添加目录</el-button>
         </el-button-group>
         <el-button-group v-if="activeIndex !== null">
           <el-button size="medium" type="danger" icon="el-icon-delete" @click="handleDelete">删除</el-button>
@@ -126,8 +126,8 @@ export default {
     handleDblclick(index) {
       const item = this.list[index]
       if (item.type === 'dir') {
-        this.active = item
         this.breadcrumb.push({ path: item.path, text: item.basename })
+        this.active = null
         this.activeIndex = null
         this.getFiles()
       } else {
@@ -138,7 +138,7 @@ export default {
       const item = this.breadcrumb.slice(0, index + 1)
       this.breadcrumb = item
       this.activeIndex = null
-      this.active = {}
+      this.active = null
       this.getFiles()
     },
     handleAddFolder() {
