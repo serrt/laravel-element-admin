@@ -23,7 +23,7 @@
       </el-form-item>
       <el-form-item label="登录密码" prop="password">
         <el-col :sm="11">
-          <el-input v-model="form.password" type="password" />
+          <el-input v-model="form.password" type="password" show-password />
         </el-col>
       </el-form-item>
       <el-form-item>

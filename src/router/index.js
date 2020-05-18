@@ -77,7 +77,6 @@ export const asyncRoutes = [
   },
   {
     path: '/admin',
-    name: 'Admin',
     component: Layout,
     meta: { title: '权限管理', permissions: ['web.admin'], icon: 'setting' },
     children: [
