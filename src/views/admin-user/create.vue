@@ -3,7 +3,7 @@
     <el-form ref="form" v-loading="formLoading" :model="form" :rules="rules" label-width="80px">
       <el-form-item label="头像">
         <el-col :sm="11">
-          <upload-image :value="form.avatar" @success="handleAvatarSuccess" />
+          <upload-image @success="handleAvatarSuccess" />
         </el-col>
       </el-form-item>
       <el-form-item label="用户名" prop="username">
@@ -33,7 +33,7 @@
       </el-form-item>
       <el-form-item label="登录密码" prop="password">
         <el-col :sm="11">
-          <el-input v-model="form.password" type="password" />
+          <el-input v-model="form.password" type="password" show-password />
         </el-col>
       </el-form-item>
       <el-form-item>
