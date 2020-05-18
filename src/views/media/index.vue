@@ -172,7 +172,7 @@ export default {
           })
         }).catch(() => {})
       } else {
-        this.$confirm('删除文件后, 且不可恢复, 是否确定?', '删除文件').then(() => {
+        this.$confirm('删除文件后, 不可恢复, 是否确定?', '删除文件').then(() => {
           deleteFiles({ path: this.active.path }).then(res => {
             if (res.code === 200) {
               this.$message.success('删除成功')
