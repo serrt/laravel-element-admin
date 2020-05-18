@@ -43,7 +43,7 @@
           <el-card v-if="active" class="preview">
             <i v-if="active.type === 'dir'" slot="header" class="el-icon-folder" />
             <i v-if="active.type === 'file'" slot="header" class="el-icon-document" />
-            <video v-if="active.type === 'video'" :src="active.url" width="100%" />
+            <video v-if="active.type === 'video'" :src="active.url" width="100%" controls />
             <el-image v-if="active.type === 'image'" :src="active.url" style="width: 150px" />
             <el-form label-suffix=":">
               <el-form-item label="名称">{{ active.filename }}</el-form-item>
