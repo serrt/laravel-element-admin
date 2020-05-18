@@ -43,6 +43,7 @@
           <el-card v-if="active" class="preview">
             <i v-if="active.type === 'dir'" slot="header" class="el-icon-folder" />
             <i v-if="active.type === 'file'" slot="header" class="el-icon-document" />
+            <video v-if="active.type === 'video'" :src="active.url" width="100%" />
             <el-image v-if="active.type === 'image'" :src="active.url" style="width: 150px" />
             <el-form label-suffix=":">
               <el-form-item label="名称">{{ active.filename }}</el-form-item>
@@ -52,6 +53,9 @@
               </el-form-item>
               <el-form-item v-if="active.url" label="URL">
                 <el-link type="primary" :underline="false" @click="openLink(active.url)">点击打开</el-link>
+                <el-tooltip content="点击复制" placement="top">
+                  <el-button type="primary" size="mini" class="el-icon-document-copy" @click="handleCopy(active.url,$event)" />
+                </el-tooltip>
               </el-form-item>
             </el-form>
           </el-card>
@@ -63,31 +67,17 @@
 
 <script>
 import { files, upload, addFolder, deleteFolder, deleteFiles } from '@/api/media'
+import clip from '@/utils/clipboard'
 
 export default {
   name: 'MediaIndex',
-  filters: {
-    formatSize(fileSize) {
-      if (!fileSize) {
-        return ''
-      }
-      if (fileSize < 1024) {
-        return fileSize + 'B'
-      } else if (fileSize < (1024 * 1024)) {
-        return (fileSize / 1024).toFixed(2) + 'KB'
-      } else if (fileSize < (1024 * 1024 * 1024)) {
-        return (fileSize / (1024 * 1024)).toFixed(2) + 'MB'
-      } else {
-        return (fileSize / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
-      }
-    }
-  },
   data() {
     return {
       list: [],
       typeIcon: {
         'dir': 'folder',
-        'file': 'file'
+        'file': 'file',
+        'video': 'video'
       },
       breadcrumb: [
         { path: '/', text: '媒体库' }
@@ -195,6 +185,9 @@ export default {
           })
         }).catch(() => {})
       }
+    },
+    handleCopy(text, event) {
+      clip(text, event)
     },
     openLink(url) {
       window.open(url)

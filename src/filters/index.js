@@ -1,4 +1,4 @@
-export { parseTime, formatTime, formatMoney } from '@/utils'
+export { parseTime, formatTime, formatMoney, formatSize } from '@/utils'
 
 /**
  * Number formatting

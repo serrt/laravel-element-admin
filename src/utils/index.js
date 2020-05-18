@@ -86,6 +86,18 @@ export function formatTime(time, option) {
   }
 }
 
+export function formatSize(value) {
+  if (value === null || value === '') {
+    return '0 Bytes'
+  }
+  const unitArr = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+  var srcsize = parseFloat(value)
+  const index = Math.floor(Math.log(srcsize) / Math.log(1024))
+  var size = srcsize / Math.pow(1024, index)
+  size = size.toFixed(2)
+  return size + unitArr[index]
+}
+
 /**
  * 格式化金额
  * @param {number} s 金额
