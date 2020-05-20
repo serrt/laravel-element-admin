@@ -68,7 +68,7 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      activeModel: 'link',
+      activeModel: 'upload',
       // 文件浏览
       list: [],
       typeIcon: {
