@@ -11,6 +11,9 @@
           />
         </el-col>
       </el-form-item>
+      <el-form-item>
+        <media-file type="image" @success="handleAvatarSuccess" />
+      </el-form-item>
       <el-form-item label="用户名">
         <el-col :sm="11">
           <el-input v-model="form.username" disabled="disabled" />
@@ -36,10 +39,11 @@
 <script>
 import { getInfo } from '@/api/auth'
 import UploadImage from '@/components/UploadImage'
+import MediaFile from '@/components/MediaFile'
 
 export default {
   name: 'Profile',
-  components: { UploadImage },
+  components: { UploadImage, MediaFile },
   data() {
     return {
       formLoading: false,
@@ -70,7 +74,6 @@ export default {
       })
     },
     handleAvatarSuccess(res) {
-      console.log(res)
       this.form.avatar = res
     },
     onSubmit() {
