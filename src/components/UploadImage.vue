@@ -13,12 +13,13 @@
       <img v-if="src" :src="src" class="avatar">
       <i v-else class="el-icon-folder-opened avatar-uploader-icon" />
     </el-upload>
-    <cropper v-if="iscrop" ref="cropper" :width="cropWidth" :height="cropHeight" :path="path" @success="handleCropSuccess" />
+    <cropper v-if="iscrop" ref="cropper" :width="cropWidth" :height="cropHeight" :path="path" :disk="disk" @success="handleCropSuccess" />
   </div>
 </template>
 <script>
 import { upload } from '@/api/web'
 import Cropper from '@/components/Cropper'
+import { config, upload as ossUpload } from '@/api/oss'
 
 export default {
   components: { Cropper },
@@ -36,12 +37,16 @@ export default {
     // 文件大小(单位: byte)
     size: {
       type: Number,
-      default: 0
+      default: 2 * 1000 * 1000
     },
     // 自定义上传函数
     upload: {
       type: Function,
       default: null
+    },
+    disk: {
+      type: String,
+      default: 'default'
     },
     // 是否需要裁剪
     iscrop: {
@@ -103,6 +108,10 @@ export default {
         this.$refs.cropper.crop(data.file)
         return
       }
+      if (this.disk === 'oss') {
+        this.handleUploadOss(data.file)
+        return
+      }
       const formData = new FormData()
       formData.append('path', this.path)
       formData.append('file', data.file)
@@ -110,6 +119,7 @@ export default {
       upload(formData).then(res => {
         this.avatarLoading = false
         if (res.code === 200) {
+          this.src = res.data.file
           this.$emit('success', res.data.file)
         } else {
           this.$message.error(res.message)
@@ -118,6 +128,26 @@ export default {
         this.avatarLoading = false
         console.log(error)
       })
+    },
+    async handleUploadOss(file) {
+      this.avatarLoading = true
+      try {
+        const response = await config({ path: this.path })
+        if (response.code !== 200) {
+          this.$message.error(response.message)
+          return false
+        }
+        const data = response.data
+        data.file = file
+        const res = await ossUpload(data)
+        this.avatarLoading = false
+        this.src = data.host + res.filename
+        this.$emit('success', data.host + res.filename)
+      } catch (error) {
+        this.avatarLoading = false
+        this.$message.error('OSS 上传失败')
+        console.log(error)
+      }
     },
     // 格式化文件大小
     formatFileSize(fileSize) {
@@ -132,6 +162,7 @@ export default {
       }
     },
     handleCropSuccess(url) {
+      this.src = url
       this.$emit('success', url)
     }
   }

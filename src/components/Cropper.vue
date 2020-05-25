@@ -44,6 +44,7 @@
 <script>
 import { VueCropper } from 'vue-cropper'
 import { upload } from '@/api/web'
+import { config, upload as ossUpload } from '@/api/oss'
 
 export default {
   name: 'Cropper',
@@ -65,6 +66,10 @@ export default {
     path: {
       type: String,
       default: 'uploads'
+    },
+    disk: {
+      type: String,
+      default: 'default'
     }
   },
   data() {
@@ -122,6 +127,10 @@ export default {
         const file = new window.File([data], fileName, {
           type: this.fileinfo.type
         })
+        if (this.disk === 'oss') {
+          this.handleUploadOss(file)
+          return
+        }
         const formData = new FormData()
         formData.append('name', file)
         formData.append('path', this.path)
@@ -148,6 +157,26 @@ export default {
     },
     smaller() {
       this.$refs.cropper.changeScale(-1)
+    },
+    async handleUploadOss(file) {
+      this.loading = true
+      try {
+        const response = await config({ path: this.path })
+        if (response.code !== 200) {
+          this.$message.error(response.message)
+          return false
+        }
+        const data = response.data
+        data.file = file
+        const res = await ossUpload(data)
+        this.loading = false
+        this.$emit('success', data.host + res.filename)
+        this.dialogVisible = false
+      } catch (error) {
+        this.loading = false
+        this.$message.error('OSS 上传失败')
+        console.log(error)
+      }
     }
   }
 }
