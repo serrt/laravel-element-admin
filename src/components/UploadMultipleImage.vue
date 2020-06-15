@@ -4,9 +4,7 @@
       v-loading="avatarLoading"
       :accept="accept"
       list-type="picture-card"
-      :data="{path: path}"
-      :action="baseUri"
-      :headers="headers"
+      action=""
       :limit="limit"
       :file-list="fileList"
       :on-success="handleSuccess"
@@ -15,17 +13,19 @@
       :on-preview="handlePictureCardPreview"
       :on-exceed="handleExceed"
       :before-upload="beforeUpload"
+      :http-request="handleUpload"
       multiple
     >
       <i class="el-icon-plus" />
     </el-upload>
     <el-dialog :visible.sync="dialogVisible">
-      <img :src="dialogImageUrl" alt="">
+      <img width="100%" :src="dialogImageUrl" alt="">
     </el-dialog>
   </div>
 </template>
 <script>
-import { getToken } from '@/utils/auth'
+import { upload } from '@/api/web'
+import { config, upload as ossUpload } from '@/api/oss'
 
 export default {
   props: {
@@ -37,7 +37,7 @@ export default {
     // 文件大小(KB)
     size: {
       type: Number,
-      default: 0
+      default: 2 * 1000 * 1000
     },
     // 文件个数限制
     limit: {
@@ -55,16 +55,14 @@ export default {
     accept: {
       type: String,
       default: 'image/*'
+    },
+    disk: {
+      type: String,
+      default: 'default'
     }
   },
   data() {
     return {
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Authorization': 'Bearer ' + getToken()
-      },
-      baseUri: process.env.VUE_APP_BASE_API + '/admin/upload',
       avatarLoading: false,
       fileList: [],
       // 图片预览
@@ -86,13 +84,11 @@ export default {
   methods: {
     handleSuccess(res, file, fileList) {
       this.fileList = fileList
-      this.avatarLoading = false
     },
     handleRemove(file, fileList) {
       this.fileList = fileList
     },
     handleError(error, file, fileList) {
-      this.avatarLoading = false
       console.log(error)
     },
     beforeUpload(file) {
@@ -101,7 +97,6 @@ export default {
         this.$message.error(`上传图片大小不能超过 ${size}`)
         return false
       }
-      this.avatarLoading = true
       return true
     },
     handleExceed(file, fileList) {
@@ -123,18 +118,57 @@ export default {
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
+    handleUpload(data) {
+      if (this.upload) {
+        this.upload(data.file)
+        return
+      }
+      if (this.disk === 'oss') {
+        this.handleUploadOss(data)
+        return
+      }
+      const formData = new FormData()
+      formData.append('path', this.path)
+      formData.append('file', data.file)
+      this.avatarLoading = true
+      upload(formData).then(res => {
+        this.avatarLoading = false
+        if (res.code === 200) {
+          data.onSuccess(res.data.file)
+        } else {
+          this.$message.error(res.message)
+        }
+      }).catch(error => {
+        this.avatarLoading = false
+        data.onError(error)
+        console.log(error)
+      })
+    },
+    async handleUploadOss(data) {
+      const file = data.file
+      this.avatarLoading = true
+      try {
+        const response = await config({ path: this.path })
+        if (response.code !== 200) {
+          this.$message.error(response.message)
+          return false
+        }
+        const data = response.data
+        data.file = file
+        const res = await ossUpload(data)
+        this.avatarLoading = false
+        data.onSuccess(data.host + res.filename)
+      } catch (error) {
+        this.avatarLoading = false
+        this.$message.error('OSS 上传失败')
+        data.onError(error)
+      }
+    },
     getFileList() {
       return this.fileList.map(item => {
-        return item.response.data.file
+        return item.response ? item.response : item.url
       })
     }
   }
 }
 </script>
-
-<style>
-.avatar {
-  max-width: 300px;
-  max-height: 300px
-}
-</style>

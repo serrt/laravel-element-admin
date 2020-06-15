@@ -1,16 +1,6 @@
 <template>
   <div style="line-height: 0;">
-    <el-upload
-      class="avatar-uploader"
-      :action="serverUrl"
-      :data="{ path: 'editor' }"
-      name="img"
-      :headers="header"
-      :show-file-list="false"
-      :on-success="uploadSuccess"
-      :on-error="uploadError"
-      :before-upload="beforeUpload"
-    />
+    <upload-image path="editor" @success="uploadSuccess" />
     <quill-editor
       ref="myQuillEditor"
       v-model="content"
@@ -25,6 +15,8 @@
 import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
+
+import UploadImage from '@/components/UploadImage'
 
 import { quillEditor } from 'vue-quill-editor'
 import { getToken } from '@/utils/auth'
@@ -51,7 +43,7 @@ const toolbarOptions = [
 ]
 
 export default {
-  components: { quillEditor },
+  components: { quillEditor, UploadImage },
   props: {
     value: {
       type: String,
@@ -75,7 +67,8 @@ export default {
               image: function(value) {
                 if (value) {
                   // 触发input框选择图片文件
-                  document.querySelector('.avatar-uploader input').click()
+                  document.querySelector('.upload-img-cbox input').click()
+                  this.quillUpdateImg = true
                 } else {
                   this.quill.format('image', false)
                 }
@@ -94,33 +87,19 @@ export default {
     }
   },
   methods: {
-    uploadSuccess(res, file) {
+    uploadSuccess(url) {
       // res为图片服务器返回的数据
       // 获取富文本组件实例
       const quill = this.$refs.myQuillEditor.quill
       // 如果上传成功
-      if (res.code === 200) {
-        // 获取光标所在位置
-        const length = quill.getSelection().index
-        // 插入图片  res.url为服务器返回的图片地址
-        quill.insertEmbed(length, 'image', res.data.img)
-        // 调整光标到最后
-        quill.setSelection(length + 1)
-      } else {
-        this.$message.error('图片插入失败')
-      }
+      // 获取光标所在位置
+      const length = quill.getSelection().index
+      // 插入图片  res.url为服务器返回的图片地址
+      quill.insertEmbed(length, 'image', url)
+      // 调整光标到最后
+      quill.setSelection(length + 1)
       // loading动画消失
       this.quillUpdateImg = false
-    },
-    beforeUpload(file) {
-      if (file.size >= 2 * 1024 * 1024) {
-        this.$message.error('上传图片大小不能超过 2MB!')
-      }
-      this.quillUpdateImg = true
-    },
-    uploadError() {
-      this.quillUpdateImg = false
-      this.$message.error('图片插入失败')
     },
     // 内容改变事件
     onEditorChange() {
@@ -130,6 +109,9 @@ export default {
 }
 </script>
 <style>
+  .upload-img-cbox {
+    display: none;
+  }
   .editor {
     line-height: normal !important;
     min-height: 50px;

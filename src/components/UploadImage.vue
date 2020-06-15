@@ -1,95 +1,97 @@
 <template>
-  <div class="upload-img-cbox">
+  <div>
     <el-upload
       v-loading="avatarLoading"
-      accept="image/*"
+      :accept="accept"
+      list-type="picture-card"
       action=""
-      :show-file-list="false"
-      :on-success="uploadSuccess"
-      :on-error="uploadError"
+      :limit="limit"
+      :file-list="fileList"
+      :on-success="handleSuccess"
+      :on-error="handleError"
+      :on-remove="handleRemove"
+      :on-preview="handlePictureCardPreview"
+      :on-exceed="handleExceed"
       :before-upload="beforeUpload"
       :http-request="handleUpload"
+      multiple
     >
-      <img v-if="src" :src="src" class="avatar">
-      <i v-else class="el-icon-folder-opened avatar-uploader-icon" />
+      <i class="el-icon-plus" />
     </el-upload>
-    <cropper v-if="iscrop" ref="cropper" :width="cropWidth" :height="cropHeight" :path="path" :disk="disk" @success="handleCropSuccess" />
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt="">
+    </el-dialog>
   </div>
 </template>
 <script>
 import { upload } from '@/api/web'
-import Cropper from '@/components/Cropper'
 import { config, upload as ossUpload } from '@/api/oss'
 
 export default {
-  components: { Cropper },
   props: {
-    // 默认值
-    value: {
-      type: String,
-      default: ''
-    },
     // 上传目录
     path: {
       type: String,
       default: 'uploads'
     },
-    // 文件大小(单位: byte)
+    // 文件大小(KB)
     size: {
       type: Number,
       default: 2 * 1000 * 1000
     },
-    // 自定义上传函数
-    upload: {
-      type: Function,
-      default: null
+    // 文件个数限制
+    limit: {
+      type: Number,
+      default: 0
+    },
+    // 默认图片
+    list: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
+    // 文件类型
+    accept: {
+      type: String,
+      default: 'image/*'
     },
     disk: {
       type: String,
       default: 'default'
-    },
-    // 是否需要裁剪
-    iscrop: {
-      type: Boolean,
-      default: false
-    },
-    // 裁剪的宽度
-    cropWidth: {
-      type: Number,
-      default: 300
-    },
-    // 裁剪的高度
-    cropHeight: {
-      type: Number,
-      default: 200
     }
   },
   data() {
     return {
       avatarLoading: false,
-      src: this.value
+      fileList: [],
+      // 图片预览
+      dialogVisible: false,
+      dialogImageUrl: ''
     }
   },
   watch: {
-    value: function(newValue, oldValue) {
-      this.src = newValue
+    list(value) {
+      const fileList = []
+      for (let i = 0; i < value.length; i++) {
+        fileList.push({
+          url: value[i]
+        })
+      }
+      this.fileList = fileList
     }
   },
-  created() {
-  },
   methods: {
-    uploadError(error, file) {
-      console.log(error)
+    handleSuccess(res, file, fileList) {
+      this.fileList = fileList
       this.avatarLoading = false
     },
-    uploadSuccess(res, file) {
+    handleRemove(file, fileList) {
+      this.fileList = fileList
+    },
+    handleError(error, file, fileList) {
       this.avatarLoading = false
-      if (res.code === 200 && res.data) {
-        this.src = res.data.file
-        this.$emit('success', this.src)
-      } else {
-        this.$message.error(res.message || '上传失败')
-      }
+      console.log(error)
     },
     beforeUpload(file) {
       if (this.size && file.size >= this.size) {
@@ -97,15 +99,31 @@ export default {
         this.$message.error(`上传图片大小不能超过 ${size}`)
         return false
       }
+      this.avatarLoading = true
       return true
+    },
+    handleExceed(file, fileList) {
+      this.$message.error(`最多上传${this.limit}张`)
+    },
+    // 格式化文件大小
+    formatFileSize(fileSize) {
+      if (fileSize < 1024) {
+        return fileSize + 'B'
+      } else if (fileSize < (1024 * 1024)) {
+        return (fileSize / 1024).toFixed(2) + 'KB'
+      } else if (fileSize < (1024 * 1024 * 1024)) {
+        return (fileSize / (1024 * 1024)).toFixed(2) + 'MB'
+      } else {
+        return (fileSize / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
+      }
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
     },
     handleUpload(data) {
       if (this.upload) {
         this.upload(data.file)
-        return
-      }
-      if (this.iscrop) {
-        this.$refs.cropper.crop(data.file)
         return
       }
       if (this.disk === 'oss') {
@@ -149,49 +167,11 @@ export default {
         console.log(error)
       }
     },
-    // 格式化文件大小
-    formatFileSize(fileSize) {
-      if (fileSize < 1024) {
-        return fileSize + 'B'
-      } else if (fileSize < (1024 * 1024)) {
-        return (fileSize / 1024).toFixed(2) + 'KB'
-      } else if (fileSize < (1024 * 1024 * 1024)) {
-        return (fileSize / (1024 * 1024)).toFixed(2) + 'MB'
-      } else {
-        return (fileSize / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
-      }
-    },
-    handleCropSuccess(url) {
-      this.src = url
-      this.$emit('success', url)
+    getFileList() {
+      return this.fileList.map(item => {
+        return item.response.data.file
+      })
     }
   }
 }
 </script>
-
-<style lang="scss">
-.avatar {
-  max-width: 300px;
-  max-height: 300px
-}
-.cropper-content {
-  position: relative;
-  &.pad60{
-    padding-left: 60px;
-  }
-  .left-option-box {
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    .handle{
-      margin: 10px 0;
-    }
-  }
-  .cropper {
-    width: auto;
-    height: 300px;
-  }
-}
-</style>
