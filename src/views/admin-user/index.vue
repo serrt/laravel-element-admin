@@ -27,7 +27,7 @@
       </el-table-column>
       <el-table-column align="right">
         <template slot="header" slot-scope="scope">
-          <form @submit.prevent="fetchData">
+          <form @submit.prevent="fetchData(true)">
             <el-input :key="scope.$index" v-model="search" type="search" size="mini" placeholder="输入关键字搜索" />
           </form>
         </template>
@@ -74,7 +74,10 @@ export default {
     this.fetchData()
   },
   methods: {
-    fetchData() {
+    fetchData(refresh) {
+      if (refresh) {
+        this.pagination.current_page = 1
+      }
       this.listLoading = true
 
       const params = {
