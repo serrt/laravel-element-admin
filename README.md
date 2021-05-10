@@ -24,3 +24,6 @@ location / {
   try_files $uri $uri/ /index.html;
 }
 ```
+## TODO
+
+1. 重写文件上传组件
