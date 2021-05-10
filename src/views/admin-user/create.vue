@@ -3,7 +3,7 @@
     <el-form ref="form" v-loading="formLoading" :model="form" :rules="rules" label-width="80px">
       <el-form-item label="头像">
         <el-col :sm="11">
-          <upload-image @success="handleAvatarSuccess" :limit="1" path="avatar" />
+          <upload-image :limit="1" path="avatar" @success="handleAvatarSuccess" />
         </el-col>
       </el-form-item>
       <el-form-item label="用户名" prop="username">
