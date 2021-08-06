@@ -48,8 +48,8 @@ const actions = {
       login({ username: username.trim(), password: password, guard }).then(response => {
         if (response.code === 200) {
           const { data } = response
-          commit('SET_TOKEN', data.api_token)
-          setToken(data.api_token)
+          commit('SET_TOKEN', data.access_token)
+          setToken(data.access_token)
           resolve()
         } else {
           Message({
