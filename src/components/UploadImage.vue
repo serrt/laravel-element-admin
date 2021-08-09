@@ -1,27 +1,19 @@
 <template>
-  <div>
-    <el-upload
-      v-loading="avatarLoading"
-      :accept="accept"
-      list-type="picture-card"
-      action=""
-      :limit="limit"
-      :file-list="fileList"
-      :on-success="handleSuccess"
-      :on-error="handleError"
-      :on-remove="handleRemove"
-      :on-preview="handlePictureCardPreview"
-      :on-exceed="handleExceed"
-      :before-upload="beforeUpload"
-      :http-request="handleUpload"
-      multiple
-    >
-      <i class="el-icon-plus" />
-    </el-upload>
-    <el-dialog :visible.sync="dialogVisible">
-      <img width="100%" :src="dialogImageUrl" alt="">
-    </el-dialog>
-  </div>
+  <el-upload
+    v-loading="avatarLoading"
+    :accept="accept"
+    class="avatar-uploader"
+    :show-file-list="false"
+    action=""
+    :on-success="handleSuccess"
+    :on-error="handleError"
+    :on-remove="handleRemove"
+    :before-upload="beforeUpload"
+    :http-request="handleUpload"
+  >
+    <img v-if="imageUrl" :src="imageUrl" class="avatar">
+    <i v-else class="el-icon-plus avatar-uploader-icon" />
+  </el-upload>
 </template>
 <script>
 import { upload } from '@/api/web'
@@ -39,17 +31,10 @@ export default {
       type: Number,
       default: 2 * 1000 * 1000
     },
-    // 文件个数限制
-    limit: {
-      type: Number,
-      default: 0
-    },
     // 默认图片
-    list: {
-      type: Array,
-      default() {
-        return []
-      }
+    value: {
+      type: String,
+      default: ''
     },
     // 文件类型
     accept: {
@@ -64,30 +49,19 @@ export default {
   data() {
     return {
       avatarLoading: false,
-      fileList: [],
-      // 图片预览
-      dialogVisible: false,
-      dialogImageUrl: ''
+      imageUrl: this.value
     }
   },
   watch: {
-    list(value) {
-      const fileList = []
-      for (let i = 0; i < value.length; i++) {
-        fileList.push({
-          url: value[i]
-        })
-      }
-      this.fileList = fileList
+    value(newValue) {
+      this.imageUrl = newValue
     }
   },
   methods: {
     handleSuccess(res, file, fileList) {
-      this.fileList = fileList
       this.avatarLoading = false
     },
     handleRemove(file, fileList) {
-      this.fileList = fileList
     },
     handleError(error, file, fileList) {
       this.avatarLoading = false
@@ -102,9 +76,6 @@ export default {
       this.avatarLoading = true
       return true
     },
-    handleExceed(file, fileList) {
-      this.$message.error(`最多上传${this.limit}张`)
-    },
     // 格式化文件大小
     formatFileSize(fileSize) {
       if (fileSize < 1024) {
@@ -117,15 +88,7 @@ export default {
         return (fileSize / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
       }
     },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url
-      this.dialogVisible = true
-    },
     handleUpload(data) {
-      if (this.upload) {
-        this.upload(data.file)
-        return
-      }
       if (this.disk === 'oss') {
         this.handleUploadOss(data.file)
         return
@@ -139,6 +102,7 @@ export default {
         if (res.code === 200) {
           this.src = res.data.file
           this.$emit('success', res.data.file)
+          this.$emit('input', res.data.file)
         } else {
           this.$message.error(res.message)
         }
@@ -159,19 +123,40 @@ export default {
         data.file = file
         const res = await ossUpload(data)
         this.avatarLoading = false
-        this.src = data.host + res.filename
-        this.$emit('success', data.host + res.filename)
+        const src = data.host + res.filename
+        this.$emit('success', src)
+        this.$emit('input', src)
       } catch (error) {
         this.avatarLoading = false
         this.$message.error('OSS 上传失败')
         console.log(error)
       }
-    },
-    getFileList() {
-      return this.fileList.map(item => {
-        return item.response.data.file
-      })
     }
   }
 }
 </script>
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+</style>

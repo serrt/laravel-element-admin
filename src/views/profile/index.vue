@@ -4,15 +4,11 @@
       <el-form-item>
         <el-col :sm="11">
           <upload-image
+            v-model="form.avatar"
             path="avatar"
-            :value="form.avatar"
             :size="1024 * 1024"
-            @success="handleAvatarSuccess"
           />
         </el-col>
-      </el-form-item>
-      <el-form-item>
-        <media-file type="image" @success="handleAvatarSuccess" />
       </el-form-item>
       <el-form-item label="用户名">
         <el-col :sm="11">
@@ -39,11 +35,10 @@
 <script>
 import { getInfo } from '@/api/auth'
 import UploadImage from '@/components/UploadImage'
-import MediaFile from '@/components/MediaFile'
 
 export default {
   name: 'Profile',
-  components: { UploadImage, MediaFile },
+  components: { UploadImage },
   data() {
     return {
       formLoading: false,
@@ -66,15 +61,13 @@ export default {
     getUserProfile() {
       getInfo().then(res => {
         if (res.code === 200) {
-          const { username, name, avatar } = this.info = res.data
+          this.info = res.data
+          const { username, name, avatar } = this.info
           this.form = { username, name, avatar }
         } else {
           this.$message.error(res.message)
         }
       })
-    },
-    handleAvatarSuccess(res) {
-      this.form.avatar = res
     },
     onSubmit() {
       this.$refs['form'].validate((valid) => {
@@ -90,33 +83,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.line{
-  text-align: center;
-}
-.avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-.avatar-uploader .el-upload:hover {
-  border-color: #409EFF;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  line-height: 178px;
-  text-align: center;
-}
-.avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
-}
-</style>
-
