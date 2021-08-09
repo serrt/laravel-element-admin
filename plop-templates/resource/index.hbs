@@ -1,0 +1,116 @@
+<template>
+  <div class="app-container">
+    <el-form :model="form" size="small" :inline="true" @keydown.native.enter.prevent="fetchData(true)">
+      <el-form-item label="名称">
+        <el-input v-model="form.name" clearable />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" @click="fetchData(true)">搜索</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="handleAdd()">增加</el-button>
+      </el-form-item>
+    </el-form>
+    <el-table v-loading="listLoading" :data="list" size="small">
+      <el-table-column align="center" label="ID" prop="id" />
+      <el-table-column align="center" label="创建时间" prop="created_at" />
+      <el-table-column align="right">
+        <template slot-scope="scope">
+          <el-button size="mini" type="default" @click="handleShow(scope.row)">详细</el-button>
+          <el-button size="mini" type="primary" @click="handleEdit(scope.row)">修改</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      background
+      layout="total, prev, pager, next"
+      :page-size="pagination.per_page"
+      :total="pagination.total"
+      @current-change="handlePageChange"
+    />
+  </div>
+</template>
+
+<script>
+import { get, post } from '@/api'
+import { EmptyFilter } from '@/utils'
+
+export default {
+  name: '{{ properCase name }}Index',
+  data() {
+    return {
+      form: {
+        name: ''
+      },
+      listLoading: true,
+      list: [],
+      pagination: {
+        per_page: 10,
+        current_page: 1,
+        total: 0
+      }
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData(refresh) {
+      if (refresh) {
+        this.pagination.current_page = 1
+      }
+      const params = Object.assign(EmptyFilter(this.form), {
+        size: this.pagination.per_page,
+        page: this.pagination.current_page
+      })
+
+      this.listLoading = true
+      get('admin-api/geo/position/index', params).then(res => {
+        this.listLoading = false
+        if (res.code === 200) {
+          this.list = res.data.list
+          this.pagination = {
+            total: res.data.total,
+            per_page: res.data.pageSize,
+            current_page: res.data.pages
+          }
+        } else {
+          this.$message.error(res.message)
+        }
+      }).catch(error => {
+        this.listLoading = false
+        console.log(error)
+      })
+    },
+    handlePageChange(page) {
+      this.pagination.current_page = page
+      this.fetchData()
+    },
+    handleShow(row) {
+      this.$router.push({ name: '{{ properCase name }}Show', params: { id: row.id }})
+    },
+    handleAdd() {
+      this.$router.push({ name: '{{ properCase name }}Create' })
+    },
+    handleEdit(row) {
+      this.$router.push({ name: '{{ properCase name }}Edit', params: { id: row.id }})
+    },
+    handleDelete(row) {
+      this.$confirm('是否确定删除?', '提示').then(result => {
+        this.listLoading = true
+        post(`admin-api/geo/position/${row.id}/delete`).then(res => {
+          this.listLoading = false
+          if (res.code === 200) {
+            this.$message.success('操作成功')
+            this.fetchData()
+          } else {
+            this.$message.error(res.message)
+          }
+        })
+      }).catch(result => {
+        this.listLoading = false
+        console.log(result)
+      })
+    }
+  }
+}
+</script>

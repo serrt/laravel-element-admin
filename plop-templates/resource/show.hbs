@@ -1,0 +1,48 @@
+<template>
+  <el-form v-loading="loading" class="app-container" label-width="120px" size="mini">
+    <el-tabs type="border-card">
+      <el-tab-pane label="基本信息">
+        <el-descriptions size="small">
+          <el-descriptions-item label="ID">{{ id }}</el-descriptions-item>
+        </el-descriptions>
+      </el-tab-pane>
+    </el-tabs>
+    <el-form-item style="margin-top: 20px;">
+      <el-button type="default" size="default" @click="handleBack">返回</el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+import { get } from '@/api'
+
+export default {
+  name: '{{ properCase name }}Show',
+  data() {
+    return {
+      id: this.$route.params.id,
+      loading: false,
+      info: {}
+    }
+  },
+  created() {
+    this.loading = true
+    get(`admin-api/geo/position/${this.id}/info`).then(res => {
+      this.loading = false
+      if (res.code === 200) {
+        this.info = res.data
+      } else {
+        this.$message.error(res.message)
+      }
+    }).catch(error => {
+      this.loading = false
+      console.log(error)
+    })
+  },
+  methods: {
+    handleBack() {
+      this.$router.back()
+    }
+  }
+}
+</script>

@@ -1,0 +1,21 @@
+<template>
+  <div class="app-container">
+    <{{ name }}-form :id="id" />
+  </div>
+</template>
+
+<script>
+import {{ properCase name }}Form from './form'
+
+export default {
+  name: '{{ properCase name }}Create',
+  components: { {{ properCase name }}Form },
+  data() {
+    return {
+      id: this.$route.params.id
+    }
+  },
+  created() {},
+  methods: {}
+}
+</script>

@@ -78,13 +78,13 @@ export const asyncRoutes = [
   {
     path: '/admin',
     component: Layout,
-    meta: { title: '权限管理', permissions: ['web.admin'], icon: 'el-icon-setting' },
+    meta: { title: '权限管理', permissions: ['auth'], icon: 'el-icon-setting' },
     children: [
       { path: '', redirect: '/admin/user' },
       {
         path: 'user',
         component: Empty,
-        meta: { title: '账号', permissions: ['web.admin.admin_user'] },
+        meta: { title: '账号', permissions: ['auth.admin_user'] },
         children: [
           { path: '', name: 'AdminUserIndex', component: () => import('@/views/admin-user/index'), meta: { title: '列表' }, hidden: true },
           { path: 'create', name: 'AdminUserCreate', component: () => import('@/views/admin-user/create'), meta: { title: '添加', activeMenu: '/admin/user' }, hidden: true },
@@ -94,7 +94,7 @@ export const asyncRoutes = [
       {
         path: 'role',
         component: Empty,
-        meta: { title: '角色', permissions: ['web.admin.role'] },
+        meta: { title: '角色', permissions: ['auth.role'] },
         children: [
           { path: '', name: 'RoleIndex', component: () => import('@/views/role/index'), meta: { title: '列表' }, hidden: true },
           { path: 'create', name: 'RoleCreate', component: () => import('@/views/role/create'), meta: { title: '添加', activeMenu: '/admin/role' }, hidden: true },
@@ -104,7 +104,7 @@ export const asyncRoutes = [
       {
         path: 'permission',
         component: Empty,
-        meta: { title: '权限', permissions: ['web.admin.permission'] },
+        meta: { title: '权限', permissions: ['auth.permission'] },
         children: [
           { path: '', name: 'PermissionIndex', component: () => import('@/views/permission/index'), meta: { title: '列表' }, hidden: true },
           { path: 'create', name: 'PermissionCreate', component: () => import('@/views/permission/create'), meta: { title: '添加', activeMenu: '/admin/permission' }, hidden: true },
