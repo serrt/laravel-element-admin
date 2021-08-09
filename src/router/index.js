@@ -60,7 +60,7 @@ export const asyncRoutes = [
       path: 'dashboard',
       name: 'dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'el-icon-house' }
     }]
   },
 
@@ -78,7 +78,7 @@ export const asyncRoutes = [
   {
     path: '/admin',
     component: Layout,
-    meta: { title: '权限管理', permissions: ['web.admin'], icon: 'setting' },
+    meta: { title: '权限管理', permissions: ['web.admin'], icon: 'el-icon-setting' },
     children: [
       { path: '', redirect: '/admin/user' },
       {
@@ -118,7 +118,7 @@ export const asyncRoutes = [
     component: Layout,
     meta: { title: '媒体管理', permissions: ['media'] },
     children: [
-      { path: '', name: 'MediaIndex', component: () => import('@/views/media/index'), meta: { title: '媒体管理', icon: 'picture' }}
+      { path: '', name: 'MediaIndex', component: () => import('@/views/media/index'), meta: { title: '媒体管理', icon: 'el-icon-picture-outline' }}
     ]
   },
   {
@@ -129,7 +129,7 @@ export const asyncRoutes = [
       {
         path: '',
         component: () => import('@/views/activity-log/index'),
-        meta: { title: '操作日志', icon: 'log' }
+        meta: { title: '操作日志', icon: 'el-icon-s-operation' }
       }
     ]
   },
