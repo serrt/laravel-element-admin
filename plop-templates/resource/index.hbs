@@ -11,6 +11,7 @@
     </el-form>
     <el-table v-loading="listLoading" :data="list" size="small">
       <el-table-column align="center" label="ID" prop="id" />
+      <el-table-column align="center" label="Name" prop="name" />
       <el-table-column align="center" label="创建时间" prop="created_at" />
       <el-table-column align="right">
         <template slot-scope="scope">
@@ -31,7 +32,7 @@
 </template>
 
 <script>
-import { get, post } from '@/api'
+import { get, destroy } from '@/api'
 import { EmptyFilter } from '@/utils'
 
 export default {
@@ -64,14 +65,14 @@ export default {
       })
 
       this.listLoading = true
-      get('admin-api/geo/position/index', params).then(res => {
+      get('admin/permission', params).then(res => {
         this.listLoading = false
         if (res.code === 200) {
-          this.list = res.data.list
+          this.list = res.data
           this.pagination = {
-            total: res.data.total,
-            per_page: res.data.pageSize,
-            current_page: res.data.pages
+            total: res.meta.total,
+            per_page: res.meta.per_page,
+            current_page: res.meta.current_page
           }
         } else {
           this.$message.error(res.message)
@@ -97,7 +98,7 @@ export default {
     handleDelete(row) {
       this.$confirm('是否确定删除?', '提示').then(result => {
         this.listLoading = true
-        post(`admin-api/geo/position/${row.id}/delete`).then(res => {
+        destroy(`admin/permission/${row.id}`).then(res => {
           this.listLoading = false
           if (res.code === 200) {
             this.$message.success('操作成功')

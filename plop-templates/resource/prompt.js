@@ -27,6 +27,10 @@ module.exports = {
       type: 'add',
       path: `src/views/${name}/show.vue`,
       templateFile: 'plop-templates/resource/show.hbs'
+    }, {
+      type: 'add',
+      path: `src/router/${name}.js`,
+      templateFile: 'plop-templates/resource/route.hbs'
     }]
 
     return actions

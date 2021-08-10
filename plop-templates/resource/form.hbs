@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="form" v-loading="formLoading" label-width="100px" :rules="rules" :model="form">
+  <el-form ref="form" v-loading="formLoading" size="small" label-width="100px" :rules="rules" :model="form">
     <el-form-item label="名称" prop="name">
       <el-input v-model="form.name" />
     </el-form-item>
@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { get, post } from '@/api'
+import { get, post, put } from '@/api'
 
 export default {
   name: '{{ properCase name }}Form',
@@ -40,12 +40,9 @@ export default {
   },
   methods: {
     getInfo() {
-      get(`admin-api/geo/position/${this.id}/info`).then(res => {
+      get(`admin/permission/${this.id}`).then(res => {
         if (res.code === 200) {
-          this.info = res.data
-          this.form = {
-            name: this.info.name
-          }
+          this.form = this.info = res.data
         } else {
           this.$message.error(res.message)
         }
@@ -67,7 +64,7 @@ export default {
     handleUpdate() {
       const params = JSON.parse(JSON.stringify(this.form))
       this.formLoading = true
-      post(`admin-api/geo/position/${this.id}/update`, params).then(res => {
+      put(`admin/permission/${this.id}`, params).then(res => {
         this.formLoading = false
         if (res.code === 200) {
           this.$message.success('修改成功')
@@ -83,7 +80,7 @@ export default {
     handleCreate() {
       const params = JSON.parse(JSON.stringify(this.form))
       this.formLoading = true
-      post(`admin-api/geo/position/create`, params).then(res => {
+      post(`admin/permission`, params).then(res => {
         this.formLoading = false
         if (res.code === 200) {
           this.$message.success('添加成功')

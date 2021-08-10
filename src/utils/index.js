@@ -176,11 +176,13 @@ export function param2Obj(url) {
   )
 }
 
-export function download(url, filename) {
-  var a = document.createElement('a')
-  a.setAttribute('href', url)
-  a.setAttribute('target', '_blank')
-  a.setAttribute('download', filename)
-  document.body.appendChild(a)
-  a.click()
+export function EmptyFilter(obj) {
+  const newObj = {}
+  for (var i in obj) {
+    if (obj[i] !== '') {
+      newObj[i] = obj[i]
+    }
+  }
+
+  return newObj
 }

@@ -1,0 +1,13 @@
+import Layout from '@/layout'
+
+export default {
+  path: '/{{ name }}',
+  component: Layout,
+  meta: { title: '{{ name }}', permissions: ['{{ name }}'], icon: 'el-icon-eleme' },
+  children: [
+    { path: '', name: '{{ properCase name }}Index', component: () => import('@/views/{{ name }}/index'), meta: { title: '全部' }, hidden: true },
+    { path: 'create', name: '{{ properCase name }}Create', component: () => import('@/views/{{ name }}/create'), meta: { title: '创建', activeMenu: '/admin/{{ name }}' }, hidden: true },
+    { path: ':id', name: '{{ properCase name }}Show', component: () => import('@/views/{{ name }}/show'), meta: { title: '详细', activeMenu: '/admin/{{ name }}' }, hidden: true },
+    { path: ':id/edit', name: '{{ properCase name }}Edit', component: () => import('@/views/{{ name }}/edit'), meta: { title: '修改', activeMenu: '/admin/{{ name }}' }, hidden: true }
+  ]
+}

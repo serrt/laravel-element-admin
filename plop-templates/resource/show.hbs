@@ -3,7 +3,7 @@
     <el-tabs type="border-card">
       <el-tab-pane label="基本信息">
         <el-descriptions size="small">
-          <el-descriptions-item label="ID">{{ id }}</el-descriptions-item>
+          <el-descriptions-item label="ID">1</el-descriptions-item>
         </el-descriptions>
       </el-tab-pane>
     </el-tabs>
@@ -27,7 +27,7 @@ export default {
   },
   created() {
     this.loading = true
-    get(`admin-api/geo/position/${this.id}/info`).then(res => {
+    get(`admin/permission/${this.id}`).then(res => {
       this.loading = false
       if (res.code === 200) {
         this.info = res.data
