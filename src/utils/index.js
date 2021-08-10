@@ -186,3 +186,11 @@ export function EmptyFilter(obj) {
 
   return newObj
 }
+
+export function generateFileName(file, path) {
+  const randomStr = Math.random().toString().substr(2, 4)
+  const suffix = file.name.substr(file.name.lastIndexOf('.'))
+  const fileName = Date.now() + randomStr + suffix
+
+  return (path ? path + '/' : '') + fileName
+}

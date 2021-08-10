@@ -72,9 +72,9 @@ export const asyncRoutes = [
     component: Layout,
     children: [{
       path: '',
-      name: 'profile',
+      name: 'Profile',
       component: () => import('@/views/profile/index'),
-      meta: { title: 'profile' }
+      meta: { title: 'Profile' }
     }]
   },
   {

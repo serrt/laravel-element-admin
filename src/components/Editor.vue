@@ -1,193 +1,113 @@
 <template>
-  <div style="line-height: 0;">
-    <upload-image path="editor" @success="uploadSuccess" />
-    <quill-editor
-      ref="myQuillEditor"
-      v-model="content"
-      class="editor"
-      :options="option"
-      @change="onEditorChange($event)"
-    />
-  </div>
+  <div id="wang-editor" v-loading="loading" />
 </template>
 
 <script>
-import 'quill/dist/quill.core.css'
-import 'quill/dist/quill.snow.css'
-import 'quill/dist/quill.bubble.css'
-
-import UploadImage from '@/components/UploadImage'
-
-import { quillEditor } from 'vue-quill-editor'
-import { getToken } from '@/utils/auth'
-// 工具栏配置
-const toolbarOptions = [
-  ['bold', 'italic', 'underline', 'strike'], // 加粗 斜体 下划线 删除线
-  ['blockquote', 'code-block'], // 引用  代码块
-  [{ header: 1 }, { header: 2 }], // 1、2 级标题
-  [{ list: 'ordered' }, { list: 'bullet' }], // 有序、无序列表
-  [{ script: 'sub' }, { script: 'super' }], // 上标/下标
-  [{ indent: '-1' }, { indent: '+1' }], // 缩进
-  // 文本方向
-  // [{ direction: 'rtl' }],
-  [{ size: ['small', false, 'large', 'huge'] }], // 字体大小
-  [{ header: [1, 2, 3, 4, 5, 6, false] }], // 标题
-  [{ color: [] }, { background: [] }], // 字体颜色、字体背景颜色
-  // 字体种类
-  // [{ font: [] }],
-  // 对齐方式
-  [{ align: [] }],
-  ['clean'], // 清除文本格式
-  // 链接(link), 图片(image), 视频(video)
-  ['image']
-]
+import E from 'wangeditor'
+import { upload } from '@/api/web'
+import { config, upload as ossUpload } from '@/api/oss'
+import { generateFileName } from '@/utils'
 
 export default {
-  components: { quillEditor, UploadImage },
   props: {
     value: {
+      type: String,
+      default: ''
+    },
+    path: {
+      type: String,
+      default: 'editor'
+    },
+    disk: {
       type: String,
       default: ''
     }
   },
   data() {
     return {
-      header: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Authorization': 'Bearer ' + getToken()
-      },
-      serverUrl: process.env.VUE_APP_BASE_API + '/admin/upload',
-      option: {
-        placeholder: '',
-        modules: {
-          toolbar: {
-            container: toolbarOptions,
-            handlers: {
-              image: function(value) {
-                if (value) {
-                  // 触发input框选择图片文件
-                  document.querySelector('.upload-img-cbox input').click()
-                  this.quillUpdateImg = true
-                } else {
-                  this.quill.format('image', false)
-                }
-              }
-            }
-          }
-        }
-      },
-      content: this.value,
-      quillUpdateImg: false
+      editor: null,
+      loading: true
     }
   },
   watch: {
-    value: function(newValue, oldValue) {
-      this.content = newValue
+    value(newValue) {
+      if (this.editor) {
+        this.editor.txt.html(newValue)
+      }
     }
   },
-  methods: {
-    uploadSuccess(url) {
-      // res为图片服务器返回的数据
-      // 获取富文本组件实例
-      const quill = this.$refs.myQuillEditor.quill
-      // 如果上传成功
-      // 获取光标所在位置
-      const length = quill.getSelection().index
-      // 插入图片  res.url为服务器返回的图片地址
-      quill.insertEmbed(length, 'image', url)
-      // 调整光标到最后
-      quill.setSelection(length + 1)
-      // loading动画消失
-      this.quillUpdateImg = false
-    },
-    // 内容改变事件
-    onEditorChange() {
-      this.$emit('change', this.content)
+  mounted() {
+    const editor = new E(`#wang-editor`)
+
+    // 配置 onchange 回调函数，将数据同步到 vue 中
+    editor.config.onchange = (newHtml) => {
+      this.$emit('input', newHtml)
     }
+
+    editor.config.customUploadImg = (resultFiles, insertImgFn) => {
+      if (this.disk === 'oss') {
+        this.loading = true
+        for (let i = 0; i < resultFiles.length; i++) {
+          config({ path: this.path }).then(res => {
+            this.loading = false
+            if (res.code === 200) {
+              const data = res.data
+              data.file = resultFiles[i]
+              data.key = generateFileName(data.file, data.dir)
+              ossUpload(data).then(res2 => {
+                console.log(res2)
+                insertImgFn(data.domain + '/' + data.key)
+              }).catch(error => {
+                this.loading = false
+                console.log(error)
+                this.$message.error('oss 上传失败')
+              })
+            } else {
+              this.$message.error(res.message)
+            }
+          }).catch(error => {
+            this.loading = false
+            console.log(error)
+            this.$message.error('oss 签名失败')
+          })
+        }
+      } else {
+        const formData = new FormData()
+        for (let i = 0; i < resultFiles.length; i++) {
+          formData.append('files[]', resultFiles[i])
+        }
+        this.loading = true
+        upload(formData).then(res => {
+          this.loading = false
+          if (res.code === 200) {
+            res.data.files.forEach(item => {
+              insertImgFn(item)
+            })
+          } else {
+            this.$message.error(res.message)
+          }
+        }).catch(error => {
+          this.loading = false
+          console.log(error)
+        })
+      }
+    }
+
+    // 创建编辑器
+    editor.create()
+
+    if (this.value) {
+      editor.txt.html(this.value)
+    }
+
+    this.editor = editor
+  },
+  beforeDestroy() {
+    // 调用销毁 API 对当前编辑器实例进行销毁
+    this.editor.destroy()
+    this.editor = null
+  },
+  methods: {
   }
 }
 </script>
-<style>
-  .upload-img-cbox {
-    display: none;
-  }
-  .editor {
-    line-height: normal !important;
-    min-height: 50px;
-  }
-  .ql-container {
-    min-height: 100px;
-  }
-  .ql-snow .ql-tooltip[data-mode=link]::before {
-    content: "请输入链接地址:";
-  }
-  .ql-snow .ql-tooltip.ql-editing a.ql-action::after {
-      border-right: 0px;
-      content: '保存';
-      padding-right: 0px;
-  }
-
-  .ql-snow .ql-tooltip[data-mode=video]::before {
-      content: "请输入视频地址:";
-  }
-
-  .ql-snow .ql-picker.ql-size .ql-picker-label::before,
-  .ql-snow .ql-picker.ql-size .ql-picker-item::before {
-    content: '14px';
-  }
-  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before,
-  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {
-    content: '10px';
-  }
-  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before,
-  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {
-    content: '18px';
-  }
-  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before,
-  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {
-    content: '32px';
-  }
-
-  .ql-snow .ql-picker.ql-header .ql-picker-label::before,
-  .ql-snow .ql-picker.ql-header .ql-picker-item::before {
-    content: '文本';
-  }
-  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="1"]::before,
-  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="1"]::before {
-    content: '标题1';
-  }
-  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="2"]::before,
-  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="2"]::before {
-    content: '标题2';
-  }
-  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="3"]::before,
-  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="3"]::before {
-    content: '标题3';
-  }
-  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="4"]::before,
-  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="4"]::before {
-    content: '标题4';
-  }
-  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="5"]::before,
-  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="5"]::before {
-    content: '标题5';
-  }
-  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="6"]::before,
-  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="6"]::before {
-    content: '标题6';
-  }
-
-  .ql-snow .ql-picker.ql-font .ql-picker-label::before,
-  .ql-snow .ql-picker.ql-font .ql-picker-item::before {
-    content: '标准字体';
-  }
-  .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=serif]::before,
-  .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {
-    content: '衬线字体';
-  }
-  .ql-snow .ql-picker.ql-font .ql-picker-label[data-value=monospace]::before,
-  .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {
-    content: '等宽字体';
-  }
-</style>

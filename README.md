@@ -26,4 +26,5 @@ location / {
 ```
 ## TODO
 
-1. 重写文件上传组件
+- 上传组件兼容OSS直传(由服务端生成签名), [https://help.aliyun.com/document_detail/31926.html](https://help.aliyun.com/document_detail/31926.html)
+- 编辑器组件的 `loading动画`

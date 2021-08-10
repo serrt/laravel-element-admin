@@ -1,20 +1,15 @@
 import request from '@/utils/request'
+import axios from 'axios'
 
 export function config(data) {
   return request({
-    url: 'api/oss',
+    url: 'admin/oss/config',
     method: 'post',
-    baseURL: 'https://pioneer-api.hmily.club',
     data
   })
 }
 
 export function upload(data) {
-  const file = data.file
-  const randomStr = Math.random().toString().substr(2, 4)
-  const suffix = file.name.substr(file.name.lastIndexOf('.'))
-  const fileName = Date.now() + randomStr + suffix
-
   const formData = new FormData()
   formData.append('policy', data.policy)
   formData.append('OSSAccessKeyId', data.accessid)
@@ -22,9 +17,9 @@ export function upload(data) {
   formData.append('callback', data.callback)
   formData.append('host', data.host)
   formData.append('path', data.dir)
-  formData.append('key', data.dir + fileName)
-  formData.append('file', file)
-  return request({
+  formData.append('key', data.key)
+  formData.append('file', data.file)
+  return axios({
     baseURL: data.host,
     method: 'post',
     url: '',
