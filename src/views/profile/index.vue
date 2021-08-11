@@ -19,10 +19,6 @@
           <el-input v-model="form.password" type="password" show-password />
         </el-col>
       </el-form-item>
-      <el-form-item label="编辑器">
-        <editor v-model="content" disk="oss" />
-        {{ content }}
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
       </el-form-item>
@@ -33,11 +29,10 @@
 <script>
 import { getInfo } from '@/api/auth'
 import UploadImage from '@/components/UploadImage'
-import Editor from '@/components/Editor'
 
 export default {
   name: 'Profile',
-  components: { UploadImage, Editor },
+  components: { UploadImage },
   data() {
     return {
       formLoading: false,
@@ -50,8 +45,7 @@ export default {
       rules: {
         name: [{ required: true, message: '姓名必填', trigger: 'blur' }],
         password: [{ min: 6, message: '密码最少6位', trigger: 'blur' }]
-      },
-      content: '1234'
+      }
     }
   },
   mounted() {

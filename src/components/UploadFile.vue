@@ -3,12 +3,15 @@
     ref="upload"
     v-loading="loading"
     drag
-    :action="baseUri"
+    action=""
     :show-file-list="showFileList"
+    :file-list="fileList"
     :multiple="multiple"
     :limit="limit"
     :before-upload="handleBeforeUpload"
     :on-exceed="handleExceed"
+    :on-remove="handleRemove"
+    :on-preview="handlePreview"
     :http-request="handleUpload"
   >
     <i class="el-icon-upload" />
@@ -20,6 +23,7 @@
 <script>
 import { upload } from '@/api/web'
 import { config, upload as ossUpload } from '@/api/oss'
+import { generateFileName } from '@/utils'
 
 export default {
   name: 'UploadFile',
@@ -54,6 +58,11 @@ export default {
       type: Array,
       default: null
     },
+    // 默认值
+    value: {
+      type: Array,
+      default: null
+    },
     showFileList: {
       type: Boolean,
       default: true
@@ -67,10 +76,22 @@ export default {
   data() {
     return {
       loading: false,
-      baseUri: ''
+      fileList: []
     }
   },
-  created() {},
+  watch: {
+    value(newValue) {
+      const list = []
+      if (newValue) {
+        for (let i = 0; i < newValue.length; i++) {
+          const item = newValue[i]
+          const itemSplit = item.split('/')
+          list.push({ name: itemSplit[itemSplit.length - 1], url: item })
+        }
+      }
+      this.fileList = list
+    }
+  },
   methods: {
     handleBeforeUpload(file) {
       if (this.size && file.size >= this.size) {
@@ -87,6 +108,14 @@ export default {
     handleExceed(files, fileList) {
       this.$message.error(`最多上传 ${this.limit} 个文件`)
     },
+    handleRemove(files, fileList) {
+      console.log(fileList)
+    },
+    handlePreview(file) {
+      if (file.url) {
+        window.open(file.url, '_blank')
+      }
+    },
     handleUpload(data) {
       if (this.disk === 'oss') {
         this.handleUploadOss(data.file)
@@ -98,7 +127,7 @@ export default {
         upload(formData).then(res => {
           this.loading = false
           if (res.code === 200) {
-            this.$emit('success', res.data.file)
+            this.uploadSuccess(res.data.file)
           } else {
             this.$message.error(res.message)
           }
@@ -118,9 +147,10 @@ export default {
         }
         const data = response.data
         data.file = file
-        const res = await ossUpload(data)
+        data.key = generateFileName(data.file, data.dir)
+        await ossUpload(data)
         this.loading = false
-        this.$emit('success', data.host + res.filename)
+        this.uploadSuccess(data.domain + '/' + data.key)
       } catch (error) {
         this.loading = false
         this.$message.error('OSS 上传失败')
@@ -144,6 +174,9 @@ export default {
       } catch (error) {
         console.log(error)
       }
+    },
+    uploadSuccess(url) {
+      this.$emit('success', url)
     },
     checkMimeType(type) {
       if (this.accept && this.accept.length > 0) {

@@ -18,6 +18,7 @@
 <script>
 import { upload } from '@/api/web'
 import { config, upload as ossUpload } from '@/api/oss'
+import { generateFileName } from '@/utils'
 
 export default {
   props: {
@@ -101,7 +102,6 @@ export default {
         this.avatarLoading = false
         if (res.code === 200) {
           this.src = res.data.file
-          this.$emit('success', res.data.file)
           this.$emit('input', res.data.file)
         } else {
           this.$message.error(res.message)
@@ -121,10 +121,10 @@ export default {
         }
         const data = response.data
         data.file = file
-        const res = await ossUpload(data)
+        data.key = generateFileName(data.file, data.dir)
+        await ossUpload(data)
         this.avatarLoading = false
-        const src = data.host + res.filename
-        this.$emit('success', src)
+        const src = data.domain + '/' + data.key
         this.$emit('input', src)
       } catch (error) {
         this.avatarLoading = false
