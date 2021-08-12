@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" v-loading="formLoading" :model="form" :rules="rules" label-width="80px">
+    <el-form ref="form" v-loading="formLoading" size="small" :model="form" :rules="rules" label-width="80px">
       <el-form-item label="Guard">
         <el-radio-group v-model="form.guard_name">
           <el-radio label="admin">Admin</el-radio>

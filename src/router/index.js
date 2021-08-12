@@ -80,7 +80,7 @@ export const asyncRoutes = [
   {
     path: '/admin',
     component: Layout,
-    meta: { title: '权限管理', permissions: ['auth'], icon: 'el-icon-setting' },
+    meta: { title: '管理员', permissions: ['auth'], icon: 'el-icon-setting' },
     children: [
       { path: '', redirect: '/admin/user' },
       {

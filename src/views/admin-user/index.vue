@@ -94,8 +94,8 @@ export default {
       })
 
       if (this.sort) {
-        params.order = this.sort.prop
-        params._order = this.sort.order === 'ascending' ? 'asc' : 'desc'
+        params.sort = this.sort.prop
+        params.sort_by = this.sort.order === 'ascending' ? 'asc' : 'desc'
       }
 
       list(params).then(res => {

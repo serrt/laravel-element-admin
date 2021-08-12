@@ -36,9 +36,9 @@
           <el-input v-model="form.password" type="password" />
         </el-col>
       </el-form-item>
-      <el-form-item label="权限">
+      <!-- <el-form-item label="权限">
         <permission-tree :value="form.permissions" @update="handleCheckChange" />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
         <el-button @click="$router.back()">返回</el-button>
@@ -51,12 +51,12 @@
 import { update, show } from '@/api/admin-user'
 import { unique } from '@/api/web'
 import { list } from '@/api/role'
-import PermissionTree from '@/components/PermissionTree'
+// import PermissionTree from '@/components/PermissionTree'
 import UploadImage from '@/components/UploadImage'
 
 export default {
   name: 'AdminUserEdit',
-  components: { PermissionTree, UploadImage },
+  components: { UploadImage },
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!value) {

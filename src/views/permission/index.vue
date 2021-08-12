@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" icon="el-icon-plus" @click="$router.push({name: 'PermissionCreate'})">添加权限</el-button>
+    <el-button type="primary" size="small" icon="el-icon-plus" @click="$router.push({name: 'PermissionCreate'})">添加权限</el-button>
     <el-table
       v-loading="listLoading"
       :data="list"

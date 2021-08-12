@@ -14,7 +14,7 @@
         <el-tag v-for="item in info.roles" :key="item.id" size="small">{{ item.display_name }}</el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="权限" :span="3">
-         <permission-tree :value="permissionIds" :check="false" />
+        <permission-tree :value="permissionIds" :check="false" />
       </el-descriptions-item>
     </el-descriptions>
     <el-form-item style="margin-top: 20px;">
