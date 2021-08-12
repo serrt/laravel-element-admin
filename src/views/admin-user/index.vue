@@ -9,7 +9,7 @@
         <el-button type="primary" icon="el-icon-plus" @click="$router.push({name: 'AdminUserCreate'})">创建</el-button>
       </el-form-item>
     </el-form>
-    <el-table v-loading="listLoading" size="small" :data="list" @sort-change="handleSortChange">
+    <el-table v-loading="listLoading" size="mini" :data="list" @sort-change="handleSortChange">
       <el-table-column align="center" label="ID" prop="id" sortable="custom" />
       <el-table-column align="center" label="姓名">
         <template slot-scope="scope">
@@ -35,6 +35,7 @@
       </el-table-column>
       <el-table-column align="right">
         <template slot-scope="scope">
+          <el-button size="mini" type="default" @click="handleShow(scope.$index, scope.row)">详细</el-button>
           <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
           <el-button size="mini" type="danger" :disabled="id === scope.row.id" :loading="buttonLoading" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -51,7 +52,7 @@
 </template>
 
 <script>
-import { list, destroy, update } from '@/api/adminUser'
+import { list, destroy, update } from '@/api/admin-user'
 import { mapGetters } from 'vuex'
 import { EmptyFilter } from '@/utils'
 
@@ -128,6 +129,9 @@ export default {
 
     handleEdit(index, row) {
       this.$router.push({ name: 'AdminUserEdit', params: { id: row.id }})
+    },
+    handleShow(index, row) {
+      this.$router.push({ name: 'AdminUserShow', params: { id: row.id }})
     },
     handleDelete(index, row) {
       this.$confirm('是否确定?', '删除该用户').then(() => {

@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { create } from '@/api/adminUser'
+import { create } from '@/api/admin-user'
 import { unique } from '@/api/web'
 import { list } from '@/api/role'
 import UploadImage from '@/components/UploadImage'

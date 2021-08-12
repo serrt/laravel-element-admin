@@ -1,12 +1,8 @@
 <template>
   <el-form v-loading="loading" class="app-container" label-width="120px" size="mini">
-    <el-tabs type="border-card">
-      <el-tab-pane label="基本信息">
-        <el-descriptions size="small">
-          <el-descriptions-item label="ID">1</el-descriptions-item>
-        </el-descriptions>
-      </el-tab-pane>
-    </el-tabs>
+    <el-descriptions title="基本信息">
+      <el-descriptions-item label="ID">1</el-descriptions-item>
+    </el-descriptions>
     <el-form-item style="margin-top: 20px;">
       <el-button type="default" size="default" @click="handleBack">返回</el-button>
     </el-form-item>

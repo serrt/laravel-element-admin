@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { update, show } from '@/api/adminUser'
+import { update, show } from '@/api/admin-user'
 import { unique } from '@/api/web'
 import { list } from '@/api/role'
 import PermissionTree from '@/components/PermissionTree'

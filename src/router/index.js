@@ -90,6 +90,7 @@ export const asyncRoutes = [
         children: [
           { path: '', name: 'AdminUserIndex', component: () => import('@/views/admin-user/index'), meta: { title: '列表' }, hidden: true },
           { path: 'create', name: 'AdminUserCreate', component: () => import('@/views/admin-user/create'), meta: { title: '添加', activeMenu: '/admin/user' }, hidden: true },
+          { path: ':id', name: 'AdminUserShow', component: () => import('@/views/admin-user/show'), meta: { title: '详细', activeMenu: '/admin/user' }, hidden: true },
           { path: ':id/edit', name: 'AdminUserEdit', component: () => import('@/views/admin-user/edit'), meta: { title: '修改', activeMenu: '/admin/user' }, hidden: true }
         ]
       },

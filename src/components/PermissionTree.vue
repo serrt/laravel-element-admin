@@ -4,7 +4,7 @@
     :data="data"
     :props="defaultProps"
     node-key="id"
-    show-checkbox
+    :show-checkbox="check"
     highlight-current
     @check="handleCheck"
   />
@@ -20,6 +20,10 @@ export default {
       default: () => {
         return []
       }
+    },
+    check: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -28,13 +32,19 @@ export default {
       defaultProps: { children: 'children', label: 'display_name' }
     }
   },
+  watch: {
+    value(newValue) {
+      if (this.check) {
+        this.$refs['tree'].setCheckedKeys(newValue)
+      } else {
+        this.data = this.data.filter(item => newValue.includes(item.id))
+      }
+    }
+  },
   created() {
     tree().then(res => {
       if (res.code === 200) {
         this.data = res.data
-        setTimeout(() => {
-          this.$refs['tree'].setCheckedKeys(this.filterKeys(this.value))
-        }, 1000)
       } else {
         this.$message.error(res.message)
       }
