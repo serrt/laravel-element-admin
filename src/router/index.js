@@ -124,18 +124,6 @@ export const asyncRoutes = [
       { path: '', name: 'MediaIndex', component: () => import('@/views/media/index'), meta: { title: '媒体管理', icon: 'el-icon-picture-outline' }}
     ]
   },
-  {
-    path: '/activity-log',
-    component: Layout,
-    meta: { permissions: ['activity-log'] },
-    children: [
-      {
-        path: '',
-        component: () => import('@/views/activity-log/index'),
-        meta: { title: '操作日志', icon: 'el-icon-s-operation' }
-      }
-    ]
-  },
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
