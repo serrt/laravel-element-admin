@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" v-loading="formLoading" :model="form" :rules="rules" label-width="80px">
+    <el-form ref="form" v-loading="formLoading" size="small" :model="form" :rules="rules" label-width="80px">
       <el-form-item label="头像">
         <el-col :sm="11">
           <upload-image :list="[form.avatar]" :limit="1" path="avatar" @success="handleAvatarSuccess" />

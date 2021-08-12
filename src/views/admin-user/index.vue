@@ -1,7 +1,15 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" icon="el-icon-plus" @click="$router.push({name: 'AdminUserCreate'})">创建</el-button>
-    <el-table v-loading="listLoading" :data="list" @sort-change="handleSortChange">
+    <el-form :model="form" size="small" :inline="true" @keydown.native.enter.prevent="fetchData(true)">
+      <el-form-item label="关键字">
+        <el-input v-model="form.key" placeholder="用户名/姓名" clearable />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" @click="fetchData(true)">搜索</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="$router.push({name: 'AdminUserCreate'})">创建</el-button>
+      </el-form-item>
+    </el-form>
+    <el-table v-loading="listLoading" size="small" :data="list" @sort-change="handleSortChange">
       <el-table-column align="center" label="ID" prop="id" sortable="custom" />
       <el-table-column align="center" label="姓名">
         <template slot-scope="scope">
@@ -26,13 +34,8 @@
         </template>
       </el-table-column>
       <el-table-column align="right">
-        <template slot="header" slot-scope="scope">
-          <form @submit.prevent="fetchData(true)">
-            <el-input :key="scope.$index" v-model="search" type="search" size="mini" placeholder="输入关键字搜索" />
-          </form>
-        </template>
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
+          <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
           <el-button size="mini" type="danger" :disabled="id === scope.row.id" :loading="buttonLoading" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -50,12 +53,15 @@
 <script>
 import { list, destroy, update } from '@/api/adminUser'
 import { mapGetters } from 'vuex'
+import { EmptyFilter } from '@/utils'
 
 export default {
   name: 'AdminUserIndex',
   data() {
     return {
-      search: '',
+      form: {
+        key: ''
+      },
       list: null,
       listLoading: false,
       pagination: {
@@ -80,12 +86,11 @@ export default {
       }
       this.listLoading = true
 
-      const params = {
+      const params = Object.assign(EmptyFilter(this.form), {
         per_page: this.pagination.per_page,
         page: this.pagination.current_page,
-        search: this.search,
         include: ['roles']
-      }
+      })
 
       if (this.sort) {
         params.order = this.sort.prop

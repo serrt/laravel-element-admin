@@ -178,7 +178,7 @@ export function param2Obj(url) {
 
 export function EmptyFilter(obj) {
   const newObj = {}
-  for (var i in obj) {
+  for (var i in JSON.parse(JSON.stringify(obj))) {
     if (obj[i] !== '') {
       newObj[i] = obj[i]
     }
