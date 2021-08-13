@@ -26,6 +26,7 @@
 <script>
 import { upload } from '@/api/web'
 import { config, upload as ossUpload } from '@/api/oss'
+import { generateFileName } from '@/utils'
 
 export default {
   props: {
@@ -71,14 +72,14 @@ export default {
     }
   },
   watch: {
-    list(value) {
-      const fileList = []
-      for (let i = 0; i < value.length; i++) {
-        fileList.push({
-          url: value[i]
-        })
+    list(newValue) {
+      const list = []
+      for (let i = 0; i < newValue.length; i++) {
+        const item = newValue[i]
+        const itemSplit = item.split('/')
+        list.push({ name: itemSplit[itemSplit.length - 1], url: item })
       }
-      this.fileList = fileList
+      this.fileList = list
     }
   },
   methods: {
@@ -140,7 +141,6 @@ export default {
         }
       }).catch(error => {
         this.avatarLoading = false
-        data.onError(error)
         console.log(error)
       })
     },
@@ -153,15 +153,16 @@ export default {
           this.$message.error(response.message)
           return false
         }
-        const data = response.data
-        data.file = file
-        const res = await ossUpload(data)
+        const configData = response.data
+        configData.file = file
+        configData.key = generateFileName(configData.file, configData.dir)
+        await ossUpload(configData)
         this.avatarLoading = false
-        data.onSuccess(data.host + res.filename)
+        data.onSuccess(configData.domain + '/' + configData.key)
       } catch (error) {
+        console.log(error)
         this.avatarLoading = false
         this.$message.error('OSS 上传失败')
-        data.onError(error)
       }
     },
     getFileList() {

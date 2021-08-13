@@ -1,6 +1,5 @@
 <template>
   <el-upload
-    ref="upload"
     v-loading="loading"
     drag
     action=""
@@ -10,6 +9,8 @@
     :limit="limit"
     :before-upload="handleBeforeUpload"
     :on-exceed="handleExceed"
+    :on-success="handleSuccess"
+    :on-error="handleError"
     :on-remove="handleRemove"
     :on-preview="handlePreview"
     :http-request="handleUpload"
@@ -59,7 +60,7 @@ export default {
       default: null
     },
     // 默认值
-    value: {
+    list: {
       type: Array,
       default: null
     },
@@ -80,7 +81,7 @@ export default {
     }
   },
   watch: {
-    value(newValue) {
+    list(newValue) {
       const list = []
       if (newValue) {
         for (let i = 0; i < newValue.length; i++) {
@@ -93,6 +94,15 @@ export default {
     }
   },
   methods: {
+    handleSuccess(res, file, fileList) {
+      this.fileList = fileList
+    },
+    handleRemove(file, fileList) {
+      this.fileList = fileList
+    },
+    handleError(error, file, fileList) {
+      console.log(error)
+    },
     handleBeforeUpload(file) {
       if (this.size && file.size >= this.size) {
         const size = this.formatFileSize(this.size)
@@ -108,53 +118,53 @@ export default {
     handleExceed(files, fileList) {
       this.$message.error(`最多上传 ${this.limit} 个文件`)
     },
-    handleRemove(files, fileList) {
-      console.log(fileList)
-    },
     handlePreview(file) {
       if (file.url) {
         window.open(file.url, '_blank')
+      } else if (file.response) {
+        window.open(file.response, '_blank')
       }
     },
     handleUpload(data) {
       if (this.disk === 'oss') {
-        this.handleUploadOss(data.file)
-      } else {
-        const formData = new FormData()
-        formData.append('path', this.path)
-        formData.append('file', data.file)
-        this.loading = true
-        upload(formData).then(res => {
-          this.loading = false
-          if (res.code === 200) {
-            this.uploadSuccess(res.data.file)
-          } else {
-            this.$message.error(res.message)
-          }
-        }).catch(error => {
-          this.loading = false
-          console.log(error)
-        })
+        this.handleUploadOss(data)
+        return
       }
+      const formData = new FormData()
+      formData.append('path', this.path)
+      formData.append('file', data.file)
+      this.avatarLoading = true
+      upload(formData).then(res => {
+        this.avatarLoading = false
+        if (res.code === 200) {
+          data.onSuccess(res.data.file)
+        } else {
+          this.$message.error(res.message)
+        }
+      }).catch(error => {
+        this.avatarLoading = false
+        console.log(error)
+      })
     },
-    async handleUploadOss(file) {
-      this.loading = true
+    async handleUploadOss(data) {
+      const file = data.file
+      this.avatarLoading = true
       try {
         const response = await config({ path: this.path })
         if (response.code !== 200) {
           this.$message.error(response.message)
           return false
         }
-        const data = response.data
-        data.file = file
-        data.key = generateFileName(data.file, data.dir)
-        await ossUpload(data)
-        this.loading = false
-        this.uploadSuccess(data.domain + '/' + data.key)
+        const configData = response.data
+        configData.file = file
+        configData.key = generateFileName(configData.file, configData.dir)
+        await ossUpload(configData)
+        this.avatarLoading = false
+        data.onSuccess(configData.domain + '/' + configData.key)
       } catch (error) {
-        this.loading = false
-        this.$message.error('OSS 上传失败')
         console.log(error)
+        this.avatarLoading = false
+        this.$message.error('OSS 上传失败')
       }
     },
     // 解析XML
@@ -175,9 +185,6 @@ export default {
         console.log(error)
       }
     },
-    uploadSuccess(url) {
-      this.$emit('success', url)
-    },
     checkMimeType(type) {
       if (this.accept && this.accept.length > 0) {
         for (let i = 0; i < this.accept.length; i++) {
@@ -190,8 +197,10 @@ export default {
       }
       return true
     },
-    clear() {
-      this.$refs['upload'].clearFiles()
+    getFileList() {
+      return this.fileList.map(item => {
+        return item.response ? item.response : item.url
+      })
     }
   }
 }
