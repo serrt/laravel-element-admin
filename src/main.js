@@ -40,6 +40,8 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+import 'default-passive-events'
+
 import * as filters from './filters'
 
 Vue.use(ElementUI)
