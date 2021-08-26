@@ -29,7 +29,7 @@ export function downloadDemo() {
   return request({
     url: 'admin/user/export',
     method: 'post',
-    data: params,
+    data: {},
     responseType: 'blob'
   }).then(res => {
     this.exportLoading = false

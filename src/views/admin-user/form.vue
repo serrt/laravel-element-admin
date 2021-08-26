@@ -105,7 +105,6 @@ export default {
       show(this.id, { include: ['roles', 'permissions'] }).then(res => {
         if (res.code === 200) {
           const data = res.data
-          const roleOptions = data.roles
           data.roles = data.roles.map(item => {
             return item.id
           })
